@@ -1,0 +1,7 @@
+ERROR: could not open file /home/ncrousei/LP1_spin_H0/notebooks/notebooks/main61.jl
+Stacktrace:
+ [1] include at ./boot.jl:328 [inlined]
+ [2] include_relative(::Module, ::String) at ./loading.jl:1105
+ [3] include(::Module, ::String) at ./Base.jl:31
+ [4] exec_options(::Base.JLOptions) at ./client.jl:287
+ [5] _start() at ./client.jl:460
