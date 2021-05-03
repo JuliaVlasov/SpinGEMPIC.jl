@@ -114,18 +114,17 @@ function sample_all( ps, pg, df :: AbstractCosGaussian, mesh )
     end 
 
     d = Normal()
-    #nnn = Int64(pg.n_particles/2)
+
     for i_part = 1:(pg.n_particles)  
-     #for i_part = 1:nnn  #  这里devided by 2
-       
+
+       # Sampling in x
        if ps.sampling_type == :sobol
            x .= mesh.xmin .+ Sobol.next!(rng_sobol) .* mesh.Lx
        else
            x .= mesh.xmin .+ rand(rng_random, ndx) .* mesh.Lx
        end
-
        
-
+       # Sampling in v
        v .= rand!(d, v)
 
        # For multiple Gaussian, draw which one to take
@@ -136,43 +135,43 @@ function sample_all( ps, pg, df :: AbstractCosGaussian, mesh )
           i_gauss += 1
        end
        v .= v .* df.params.σ[i_gauss] .+ df.params.μ[i_gauss]
-       #
-       	#=        
-        for tt = 1:10
-           s[1] = randn()
-           s[2] = randn()
-           s[3] = randn()
-           if norm(s) > 10^(-4)
-               break
-           end
-        end
+
+       # Sampling in s
+       #1st option: spin uniformly distributed on the sphere 
+       # for tt = 1:10
+       #    s[1] = randn()
+       #    s[2] = randn()
+       #    s[3] = randn()
+       #    if norm(s) > 10^(-4)
+       #        break
+       #    end
+       # end
         
-        s .= s./norm(s)
-	w  = 1.0
-        =#
+       # s .= s./norm(s)
+       # w  = 1.0
 
-	#polarized along s[2]
-	#s[3] = 0.0
-	#s[2] = 1.0
-	#s[1] = 0.0
-	#w    = 1.0
+       #2nd option: spin polarized along s[3]
+       #s[1] = 0.0
+       #s[2] = 0.0
+       #s[3] = 1.0
+       #w    = 1.0
 
-	#1/(4pi) (1+eta*s[3]) fM(v)
-	##########################
-	for tt=1:10
-	    s[1]=randn()
-	    s[2]=randn()
-	    s[3]=randn()
-	    if norm(s)>10^(-4)
-	       break
-	    end
-        end
-	s.=s./norm(s)
-	w= 1/(4*pi)*(1+0.5*s[3])
+       #3rd option: Wigner type initial condition 1/(4pi) (1+eta*s[3]) fM(v)
+       ##########################
+       for tt=1:10
+           s[1]=randn()
+	   s[2]=randn()
+	   s[3]=randn()
+	   if norm(s)>10^(-4)
+	      break
+	   end
+       end
+       s.=s./norm(s)
+       w= 1/(4*pi)*(1+0.5*s[3]).*4*pi 
 
-	########################
-        # Set weight according to value of perturbation
-	w  = w * eval_x_density(df, x) .* prod(mesh.Lx).*4*pi 
+       ########################
+       # Set weight according to value of perturbation
+       w  = w * eval_x_density(df, x) .* prod(mesh.Lx)
 
        # Copy the generated numbers to the particle
        set_x(pg, i_part, x)
@@ -183,92 +182,8 @@ function sample_all( ps, pg, df :: AbstractCosGaussian, mesh )
        # Set weights.
        set_weights(pg, i_part, w)
         
-        ############################################################# first loop
-       #= 
-        if ps.sampling_type == :sobol
-           x .= mesh.xmin .+ Sobol.next!(rng_sobol) .* mesh.Lx
-       else
-           x .= mesh.xmin .+ rand(rng_random, ndx) .* mesh.Lx
-       end
-
-       # Set weight according to value of perturbation
-       w  = eval_x_density(df, x) .* prod(mesh.Lx)
-
-       v .= rand!(d, v)
-
-       # For multiple Gaussian, draw which one to take
-       rnd_no = rdn[ndx+ndv+1]
-        
-       i_gauss = 1
-       while( rnd_no > δ[i_gauss] )
-          i_gauss += 1
-       end
-       v .= v .* df.params.σ[i_gauss] .+ df.params.μ[i_gauss]
-       #
-        for tt = 1:10
-            s[1] = randn()
-            s[2] = randn()
-            s[3] = randn()
-            if norm(s) > 10^(-4)
-                break
-            end
-        end
-        
-        s .= s./norm(s)
-       # Copy the generated numbers to the particle
-       set_x(pg, 2*i_part-1, x)
-       set_v(pg, 2*i_part-1, v)
-       set_s1(pg, 2*i_part-1, s[1])
-       set_s2(pg, 2*i_part-1, s[2])
-       set_s3(pg, 2*i_part-1, s[3])
-       # Set weights.
-       set_weights(pg, 2*i_part-1, w)
-        ############################################################# second loop
-        if ps.sampling_type == :sobol
-           x .= mesh.xmin .+ Sobol.next!(rng_sobol) .* mesh.Lx
-       else
-           x .= mesh.xmin .+ rand(rng_random, ndx) .* mesh.Lx
-       end
-
-       # Set weight according to value of perturbation
-       w  = eval_x_density(df, x) .* prod(mesh.Lx)
-
-       v .= rand!(d, v)
-
-       # For multiple Gaussian, draw which one to take
-       rnd_no = rdn[ndx+ndv+1]
-        
-       i_gauss = 1
-       while( rnd_no > δ[i_gauss] )
-          i_gauss += 1
-       end
-       v .= v .* df.params.σ[i_gauss] .- df.params.μ[i_gauss]
-       #
-        for tt = 1:10
-            s[1] = randn()
-            s[2] = randn()
-            s[3] = randn()
-            if norm(s) > 10^(-4)
-                break
-            end
-        end
-        
-        s .= s./norm(s)
-                
-       # Copy the generated numbers to the particle
-       set_x(pg, 2*i_part, x)
-       set_v(pg, 2*i_part, v)
-       set_s1(pg, 2*i_part, s[1])
-       set_s2(pg, 2*i_part, s[2])
-       set_s3(pg, 2*i_part, s[3])
-       # Set weights.
-       set_weights(pg, 2*i_part, w)
-       =#
-    end
-       
-    
-    
-    
+    end	
+                   
 end
 
 """

@@ -26,7 +26,7 @@ function solve_poisson!( efield_dofs       :: Vector{Float64},
        wi = get_charge(particle_group, i_part)
        add_charge!(rho, kernel_smoother_0, xi, wi)
     end
-println(sum(rho))
+    println(sum(rho))
     compute_e_from_rho!( efield_dofs, maxwell_solver, rho )
 
 end
@@ -66,60 +66,6 @@ function pic_diagnostics_transfer( particle_group,
     
 end
 
-"""
-    pic_diagnostics_vvb( particle_group, kernel_smoother_1, bfield_dofs )
-
-Compute ``\\sum_{particles} ( w_p v_1, p b(x_p) v_2, p )``
-
-- `particle_group`    : particle group object
-- `kernel_smoother_1` : Kernel smoother (order p)  
-- `bfield_dofs` : coefficients of bfield
-
-"""
-#=
-function pic_diagnostics_vvb( particle_group, kernel_smoother_1, afield_dofs )
-
-    vvb = 0.0
-    for i_part = 1:particle_group.n_particles
-
-       xi = get_x( particle_group, i_part )
-       wi = get_charge( particle_group, i_part )
-       vi = get_v( particle_group, i_part )
-
-        bfield = evaluate(kernel_smoother_1, xi[1], afield_dofs[1] )
-
-       vvb += wi * vi[1] *  bfield
-     
-    end
-
-    vvb
-
-end
-=#
-"""
-    pic_diagnostics_poynting( maxwell_solver, degree, efield_dofs, bfield_dofs, 
-                              rho )
-
-Compute ``e^T M_0^{-1}  R^T b``
-
-- `maxwell_solver` : maxwell solver object
-- `degree` : degree of finite element
-- `efield_dofs` : coefficients of `efield`
-- `bfield_dofs` : coefficients of `bfield`
-
-"""
-#=
-function pic_diagnostics_poynting( maxwell_solver, degree, efield_dofs, 
-                                   afield_dofs )
-
-    scratch = similar(bfield_dofs)
-    # Multiply B by M_0^{-1}  R^T
-    compute_e_from_b!(scratch, maxwell_solver, 1.0, afield_dofs[1] )
-
-    inner_product( maxwell_solver, efield_dofs, scratch, degree )
-
-end
-=#
   
 export TimeHistoryDiagnostics
 
@@ -168,8 +114,6 @@ mutable struct TimeHistoryDiagnostics
                          PotentialEnergyB2 = Float64[],
                          PotentialEnergyB3 = Float64[],
                          Transfer = Float64[],
-                         #VVB = Float64[],
-                         #Poynting = Float64[],
                          ErrorPoisson = Float64[])
 
 
@@ -186,12 +130,15 @@ export write_step!
 
 write diagnostics for PIC
 - `time` : Time
-- `efield_dofs` : Electric field
-- `efield_dofs_n` : Electric field at half step
+- `afield_dofs[1]` : Magnetic Potential Ay
+- `afield_dofs[2]` : Magnetic Potential Az
+- `efield_dofs[1]` : Longitudinal Electric field Ex
 - `efield_poisson` : Electric field compute from Poisson equation
-- `bfield_dofs` : Magnetic field
+- `efield_dofs[2]` : Ey
+- `efield_dofs[3]` : Ez
 - `degree` : Spline degree
 """
+
 function write_step!( thdiag :: TimeHistoryDiagnostics,
                       time, degree, efield_dofs,
                       afield_dofs, efield_dofs_n, 
@@ -200,45 +147,47 @@ function write_step!( thdiag :: TimeHistoryDiagnostics,
     diagnostics = zeros(Float64, 12)
     potential_energy = zeros(Float64, 5)
     HH = 0.00022980575
+
     for i_part=1:thdiag.particle_group.n_particles
         fill!(propagator.j_dofs[1], 0.0)
         fill!(propagator.j_dofs[2], 0.0)
-       xi = get_x(   thdiag.particle_group, i_part)
-       vi = get_v(   thdiag.particle_group, i_part)
-       s1 = get_s1(   thdiag.particle_group, i_part)
-       s2 = get_s2(   thdiag.particle_group, i_part)
-       s3 = get_s3(   thdiag.particle_group, i_part) 
-       wi = get_mass(thdiag.particle_group, i_part)
-       # Kinetic energy
-       v2 = evaluate(thdiag.kernel_smoother_0, xi[1], afield_dofs[1])
-       v3 = evaluate(thdiag.kernel_smoother_0, xi[1], afield_dofs[2])
-       diagnostics[1] += 0.5*(vi[1]^2 + v2[1]^2 + v3[1]^2) * wi[1]  # 0.5 * wi[1] * vi[1]^2  
-       add_charge!( propagator.j_dofs[2], propagator.kernel_smoother_1, xi, 1.0)
-       compute_derivetives_from_basis!(propagator.j_dofs[1], propagator.maxwell_solver, propagator.j_dofs[2])
-       diagnostics[2] += HH * (afield_dofs[2]'*propagator.j_dofs[1]*wi*s2 -  afield_dofs[1]'*propagator.j_dofs[1]*wi*s3)
-       # Momentum 1
-       diagnostics[3] += xi[1] * wi[1]
-       diagnostics[4] += xi[1] * wi[1] * s1
-       diagnostics[5] += xi[1] * wi[1] * s2
-       diagnostics[6] += xi[1] * wi[1] * s3
-       diagnostics[7] += wi[1] * s1
-       diagnostics[8] += wi[1] * s2
-       diagnostics[9] += wi[1] * s3
-       diagnostics[10] += (afield_dofs[1]'*propagator.j_dofs[1]*wi*s2+afield_dofs[2]'*propagator.j_dofs[1]*wi*s3)
-       diagnostics[11] += afield_dofs[1]'*propagator.j_dofs[1]*wi*s1*(-1.0)
-       diagnostics[12] += afield_dofs[2]'*propagator.j_dofs[1]*wi*s1*(-1.0)
-    end
+        xi = get_x(   thdiag.particle_group, i_part)
+        vi = get_v(   thdiag.particle_group, i_part)
+        s1 = get_s1(   thdiag.particle_group, i_part)
+        s2 = get_s2(   thdiag.particle_group, i_part)
+        s3 = get_s3(   thdiag.particle_group, i_part) 
+        wi = get_mass(thdiag.particle_group, i_part)
+
+	# Kinetic energy
+        v2 = evaluate(thdiag.kernel_smoother_0, xi[1], afield_dofs[1])
+        v3 = evaluate(thdiag.kernel_smoother_0, xi[1], afield_dofs[2])
+        diagnostics[1] += 0.5*(vi[1]^2 + v2[1]^2 + v3[1]^2) * wi[1]  # 0.5 * wi[1] * vi[1]^2  
+
+	#Zeeman energy
+	add_charge!( propagator.j_dofs[2], propagator.kernel_smoother_1, xi, 1.0)
+        compute_derivatives_from_basis!(propagator.j_dofs[1], propagator.maxwell_solver, propagator.j_dofs[2])
+        diagnostics[2] += HH * (afield_dofs[2]'*propagator.j_dofs[1]*wi*s2 -  afield_dofs[1]'*propagator.j_dofs[1]*wi*s3)
+
+	# Momentum: compute integrals of f like <s* f> = int s* f dx dp ds
+        diagnostics[3] += xi[1] * wi[1]
+        diagnostics[4] += xi[1] * wi[1] * s1
+        diagnostics[5] += xi[1] * wi[1] * s2
+        diagnostics[6] += xi[1] * wi[1] * s3
+        diagnostics[7] += wi[1] * s1   
+        diagnostics[8] += wi[1] * s2   
+        diagnostics[9] += wi[1] * s3 
+        diagnostics[10] += (afield_dofs[1]'*propagator.j_dofs[1]*wi*s2+afield_dofs[2]'*propagator.j_dofs[1]*wi*s3)
+        diagnostics[11] += afield_dofs[1]'*propagator.j_dofs[1]*wi*s1*(-1.0)
+        diagnostics[12] += afield_dofs[2]'*propagator.j_dofs[1]*wi*s1*(-1.0)
+     end
 
     transfer = pic_diagnostics_transfer( thdiag.particle_group, 
         thdiag.kernel_smoother_0, thdiag.kernel_smoother_1, 
         efield_dofs )
-#=
-    vvb = pic_diagnostics_vvb( thdiag.particle_group, 
-    thdiag.kernel_smoother_1, afield_dofs[1])
 
-    poynting = pic_diagnostics_poynting( thdiag.maxwell_solver, degree, 
-    efield_dofs[2], afield_dofs[1] )
-=#  
+    #Energies
+    #Electric energies int | E_*(x) |^2 dx
+    
     potential_energy[1] = 0.5*inner_product(thdiag.maxwell_solver, 
         efield_dofs[1], efield_dofs[1], degree-1 )
     
@@ -247,27 +196,18 @@ function write_step!( thdiag :: TimeHistoryDiagnostics,
    
     potential_energy[3] = 0.5*inner_product( thdiag.maxwell_solver, 
         efield_dofs[3], efield_dofs[3], degree )
+
+    # Magnetic energy
     nn =  thdiag.kernel_smoother_0.n_dofs
     aa = zeros(Float64,nn)
-    compute_derivetives_from_basis2!(aa, thdiag.maxwell_solver, afield_dofs[1])
+    compute_derivatives_from_basis2!(aa, thdiag.maxwell_solver, afield_dofs[1])
     potential_energy[4] = 0.5*l2norm_squared( thdiag.maxwell_solver, 
         aa, degree-1 )
     bb = zeros(Float64,nn)
-    compute_derivetives_from_basis2!(bb, thdiag.maxwell_solver, afield_dofs[2])
+    compute_derivatives_from_basis2!(bb, thdiag.maxwell_solver, afield_dofs[2])
     potential_energy[5] = 0.5*l2norm_squared( thdiag.maxwell_solver, 
         bb, degree-1 )
 
-#=
-    println( """ 
-time = $time,  
-potential_energy = $potential_energy, 
-diagnostics[1] = $(diagnostics[1]),
-diagnostics + sum(potential_energy) = $(diagnostics[1] + sum(potential_energy))
-diagnostics[2:3] = $(diagnostics[2:3]), 
--transfer+vvb+poynting =  $(-transfer+vvb+poynting),
-maximum(abs.(efield_1_dofs .- efield_poisson))) = $(maximum(abs.(efield_1_dofs .- efield_poisson)))
-""")
-=#
     push!(thdiag.data, ( time,  
                          diagnostics...,
                          potential_energy..., 
