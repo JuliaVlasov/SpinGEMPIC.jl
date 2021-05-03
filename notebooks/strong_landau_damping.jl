@@ -142,8 +142,8 @@ Ay(x) = -E0/ww*sin(k0*x)
 Az(x) = E0/ww*cos(k0*x)
   
 #efield_dofs = [efield_poisson, zeros(Float64, nx), zeros(Float64, nx)]
-e_dofs = [ zeros(nx), zeros(nx), zeros(nx)]
-e_dofs[1] .= efield_poisson 
+efield_dofs = [ zeros(nx), zeros(nx), zeros(nx)]
+efield_dofs[1] .= efield_poisson 
 afield_dofs = [zeros(Float64, nx), zeros(Float64, nx)]
 #l2projection!( efield_poisson, maxwell_solver, e1, spline_degree-1)
 l2projection!( efield_dofs[2], maxwell_solver, Ey, spline_degree)
