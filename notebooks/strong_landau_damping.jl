@@ -37,7 +37,7 @@ include("../src/diagnostics.jl")
 # $$
 # f(x,v) =\frac{1}{2\pi\sigma^2}  exp(-0.5 (v-μ)^2 / \sigma^2 ) * ( 1+\alpha \cos(kx x)􏰁),
 # $$
-
+#Test corresponding to Fig. 4 of the JPP paper (runs of 10 hours on maple-irmar)
 
 # The physical parameters 
 
@@ -166,7 +166,8 @@ efield_dofs_n = propagator.e_dofs
 thdiag = TimeHistoryDiagnostics( particle_group, maxwell_solver, 
                         kernel_smoother0, kernel_smoother1 );
 
-steps, Δt = 40000, 0.1
+#final time 4000
+steps, Δt = 80000, 0.05
 mode1 = zeros(ComplexF64,steps)
 mode2 = zeros(ComplexF64,steps)
 store = zeros(ComplexF64,nx)
