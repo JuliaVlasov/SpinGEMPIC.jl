@@ -1,0 +1,4 @@
+name = "SpinVlasovMaxwellPIC"
+uuid = "a1a395a5-632e-452d-b4fa-4bbe3fda7592"
+authors = ["Pierre Navaro <pierre.navaro@math.cnrs.fr>"]
+version = "0.1.0"

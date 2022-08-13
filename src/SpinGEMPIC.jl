@@ -1,4 +1,4 @@
-module GEMPIC
+module SpinGEMPIC
 
     # Utilities
     include("mesh.jl")

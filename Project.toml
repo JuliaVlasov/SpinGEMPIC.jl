@@ -1,6 +1,6 @@
-name = "GEMSpin"
-uuid = "b6d65c3a-4a4e-11e9-25d0-d309dc85ddeb"
-authors = ["Pierre Navaro <pierre.navaro@math.cnrs.fr>"]
+name = "SpinGEMPIC"
+uuid = "a1a395a5-632e-452d-b4fa-4bbe3fda7592"
+authors = ["Julia Vlasov"]
 version = "0.1.0"
 
 [deps]
