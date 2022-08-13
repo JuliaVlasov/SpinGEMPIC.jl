@@ -1,3 +1,4 @@
+
 using DataFrames
 
 export solve_poisson!
@@ -179,7 +180,7 @@ function write_step!(
 
         #Zeeman energy
         add_charge!(propagator.j_dofs[2], propagator.kernel_smoother_1, xi, 1.0)
-        compute_derivatives_from_basis!(
+        compute_rderivatives_from_basis!(
             propagator.j_dofs[1],
             propagator.maxwell_solver,
             propagator.j_dofs[2],
@@ -229,10 +230,10 @@ function write_step!(
     # Magnetic energy
     nn = thdiag.kernel_smoother_0.n_dofs
     aa = zeros(Float64, nn)
-    compute_derivatives_from_basis2!(aa, thdiag.maxwell_solver, afield_dofs[1])
+    compute_lderivatives_from_basis!(aa, thdiag.maxwell_solver, afield_dofs[1])
     potential_energy[4] = 0.5 * l2norm_squared(thdiag.maxwell_solver, aa, degree - 1)
     bb = zeros(Float64, nn)
-    compute_derivatives_from_basis2!(bb, thdiag.maxwell_solver, afield_dofs[2])
+    compute_lderivatives_from_basis!(bb, thdiag.maxwell_solver, afield_dofs[2])
     potential_energy[5] = 0.5 * l2norm_squared(thdiag.maxwell_solver, bb, degree - 1)
 
     push!(

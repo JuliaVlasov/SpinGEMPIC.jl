@@ -1,3 +1,13 @@
+import GEMPIC: AbstractMaxwellSolver
+import GEMPIC: Maxwell1DFEM
+import GEMPIC: compute_e_from_rho!
+import GEMPIC: compute_rderivatives_from_basis!
+import GEMPIC: compute_lderivatives_from_basis!
+import GEMPIC: inner_product
+import GEMPIC: l2norm_squared
+import GEMPIC: compute_e_from_j!
+import GEMPIC: compute_e_from_b!
+
 using StaticArrays
 
 abstract type AbstractSplitting end
@@ -57,6 +67,9 @@ struct HamiltonianSplitting
         @assert kernel_smoother_0.n_dofs == kernel_smoother_1.n_dofs
 
         j_dofs = [zeros(Float64, kernel_smoother_0.n_dofs) for i = 1:2]
+
+        nx = maxwell_solver.n_dofs
+
         part1 = zeros(Float64, nx)
         part2 = zeros(Float64, nx)
         part3 = zeros(Float64, nx)
@@ -252,7 +265,7 @@ function operatorHA(h::HamiltonianSplitting, dt::Float64)
         add_charge!(h.j_dofs[1], h.kernel_smoother_1, xi, 1.0)
 
         # values of the derivatives of basis function
-        compute_derivatives_from_basis!(aa, h.maxwell_solver, h.j_dofs[1])
+        compute_rderivatives_from_basis!(aa, h.maxwell_solver, h.j_dofs[1])
         h.j_dofs[1] .= aa
 
         vi = vi - dt / 2 * (h.a_dofs[1]' * h.j_dofs[1] * (h.j_dofs[2]' * h.a_dofs[1]))
@@ -278,8 +291,8 @@ function operatorHA(h::HamiltonianSplitting, dt::Float64)
 
     # with the (d^2 A/ dx^2) part 
 
-    compute_derivatives_from_basis2!(h.part3, h.maxwell_solver, h.a_dofs[1])
-    compute_derivatives_from_basis2!(h.part4, h.maxwell_solver, h.a_dofs[2])
+    compute_lderivatives_from_basis!(h.part3, h.maxwell_solver, h.a_dofs[1])
+    compute_lderivatives_from_basis!(h.part4, h.maxwell_solver, h.a_dofs[2])
 
     compute_e_from_b!(h.e_dofs[2], h.maxwell_solver, dt, h.part3)
     compute_e_from_b!(h.e_dofs[3], h.maxwell_solver, dt, h.part4)
@@ -357,7 +370,7 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
 
         add_charge!(h.j_dofs[2], h.kernel_smoother_1, xi, 1.0)
 
-        compute_derivatives_from_basis!(h.j_dofs[1], h.maxwell_solver, h.j_dofs[2])
+        compute_rderivatives_from_basis!(h.j_dofs[1], h.maxwell_solver, h.j_dofs[2])
 
         Y = h.a_dofs[1]' * h.j_dofs[1]
         Z = h.a_dofs[2]' * h.j_dofs[1]
@@ -411,8 +424,8 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
         # update velocity
         fill!(h.j_dofs[2], 0.0)
         add_charge!(h.j_dofs[2], h.kernel_smoother_2, xi, 1.0)
-        compute_derivatives_from_basis!(h.j_dofs[1], h.maxwell_solver, h.j_dofs[2])
-        compute_derivatives_from_basis!(aa, h.maxwell_solver, h.j_dofs[1])
+        compute_rderivatives_from_basis!(h.j_dofs[1], h.maxwell_solver, h.j_dofs[2])
+        compute_rderivatives_from_basis!(aa, h.maxwell_solver, h.j_dofs[1])
         h.j_dofs[1] .= aa
 
         vi =
@@ -429,8 +442,8 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
 
     aa = zeros(Float64, n_cells)
     bb = zeros(Float64, n_cells)
-    compute_derivatives_from_basis!(aa, h.maxwell_solver, h.part1)
-    compute_derivatives_from_basis!(bb, h.maxwell_solver, -h.part2)
+    compute_rderivatives_from_basis!(aa, h.maxwell_solver, h.part1)
+    compute_rderivatives_from_basis!(bb, h.maxwell_solver, -h.part2)
 
     compute_e_from_j!(h.e_dofs[2], h.maxwell_solver, HH .* aa, 2)
     compute_e_from_j!(h.e_dofs[3], h.maxwell_solver, HH .* bb, 2)
