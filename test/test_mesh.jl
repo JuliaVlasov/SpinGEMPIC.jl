@@ -1,7 +1,4 @@
-using GEMPIC
-
 @testset " Mesh " begin
-
 
     mesh1d = Mesh( -π, π, 11 )
     mesh2d = Mesh( 0.0, 2π, 11, -6.0, 6.0, 21 )
