@@ -1,26 +1,21 @@
 using Documenter
-using GEMPIC
+using SpinGEMPIC
 
 makedocs(
-    sitename = "GEMPIC",
+    sitename = "SpinGEMPIC",
     format = Documenter.HTML(),
-    modules = [GEMPIC],
+    modules = [SpinGEMPIC],
     pages = ["Documentation" => ["index.md",
                                  "mesh.md",
-                                 "low_level_bsplines.md",
-                                 "splinepp.md",
                                  "particle_mesh_coupling.md",
                                  "distributions.md",
                                  "particle_group.md",
                                  "particle_sampling.md",
-                                 "maxwell_solver.md",
                                  "hamiltonian_splitting.md",
-                                 "hamiltonian_splitting_boris.md",
                                  "diagnostics.md"],
              "Contents"      => "contents.md"]
 )
 
 deploydocs(
-    deps   = Deps.pip("mkdocs", "python-markdown-math"),
-    repo   = "github.com/JuliaVlasov/GEMPIC.jl.git",
+    repo   = "github.com/JuliaVlasov/SpinGEMPIC.jl.git",
  )
