@@ -1,7 +1,7 @@
 # Distributions
 
 ```@autodocs
-Modules = [GEMPIC]
+Modules = [SpinGEMPIC]
 Pages   = ["distributions.jl"]
 ```
 

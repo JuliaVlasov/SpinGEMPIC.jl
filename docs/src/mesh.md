@@ -1,7 +1,7 @@
 # Mesh
 
 ```@autodocs
-Modules = [GEMPIC]
+Modules = [SpinGEMPIC]
 Pages   = ["mesh.jl"]
 ```
 

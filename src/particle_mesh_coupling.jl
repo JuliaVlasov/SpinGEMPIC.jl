@@ -2,10 +2,6 @@ using FastGaussQuadrature
 
 import GEMPIC: SplinePP
 import GEMPIC: uniform_bsplines_eval_basis
-#import GEMPIC: b_to_pp
-#import GEMPIC: horner_1d
-#import GEMPIC: horner_primitive_1d
-
 
 export ParticleMeshCoupling
 

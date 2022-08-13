@@ -1,7 +1,7 @@
 # Hamiltonian splitting
 
 ```@autodocs
-Modules = [GEMPIC]
+Modules = [SpinGEMPIC]
 Pages   = ["hamiltonian_splitting.jl"]
 ```
 

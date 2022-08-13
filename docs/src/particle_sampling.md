@@ -1,7 +1,7 @@
 # Particle sampling
 
 ```@autodocs
-Modules = [GEMPIC]
+Modules = [SpinGEMPIC]
 Pages   = ["particle_sampling.jl"]
 ```
 

@@ -121,7 +121,6 @@ function strang_splitting!(h::HamiltonianSplitting, dt::Float64, number_steps::I
 
     for i_step = 1:number_steps
 
-        #full system fast version       
         operatorHE(h, 0.5dt)
         operatorHp(h, 0.5dt)
         operatorHA(h, 0.5dt)
@@ -130,53 +129,9 @@ function strang_splitting!(h::HamiltonianSplitting, dt::Float64, number_steps::I
         operatorHp(h, 0.5dt)
         operatorHE(h, 0.5dt)
 
-        #LP system without spin
-        #       operatorHE(h, 0.5dt)
-        #       operatorHA(h, 0.5dt)
-        #       operatorHp(h, 1.0dt)
-        #       operatorHA(h, 0.5dt)
-        #       operatorHE(h, 0.5dt)
-
     end
 
 end
-
-export lie_splitting!
-"""
-    lie_splitting( h, dt, number_steps)
-
-Lie splitting
-"""
-function lie_splitting!(h::HamiltonianSplitting, dt::Float64, number_steps::Int64)
-
-    for i_step = 1:number_steps
-        operatorHs(h, dt)
-        operatorHE(h, dt)
-        operatorHp(h, dt)
-        operatorHA(h, dt)
-    end
-
-end
-
-export lie_splitting_back!
-"""
-    lie_splitting_back(h, dt, number_steps)
-
-Lie splitting (oposite ordering)
-"""
-function lie_splitting_back!(h::HamiltonianSplitting, dt::Float64, number_steps::Int64)
-
-    for i_step = 1:number_steps
-
-        operatorHA(h, dt)
-        operatorHp(h, dt)
-        operatorHE(h, dt)
-        operatorHs(h, dt)
-
-    end
-
-end
-
 
 """
     operatorHp(h, dt)

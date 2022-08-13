@@ -1,7 +1,7 @@
 # Particle group
 
 ```@autodocs
-Modules = [GEMPIC]
+Modules = [SpinGEMPIC]
 Pages   = ["particle_group.jl"]
 ```
 

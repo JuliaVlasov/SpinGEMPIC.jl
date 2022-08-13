@@ -1,7 +1,7 @@
 # Diagnostics
 
 ```@autodocs
-Modules = [GEMPIC]
+Modules = [SpinGEMPIC]
 Pages   = ["diagnostics.jl"]
 ```
 
