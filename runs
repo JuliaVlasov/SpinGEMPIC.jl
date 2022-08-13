@@ -1,4 +1,0 @@
-#H=0
-nohup /opt/julia-1.3.0/bin/julia --project -O3 notebooks/strong_landau_damping_E0_5_vth_0p05_circ.jl >nohup_E0_5_vth_0p05.out
-
-nohup /opt/julia-1.3.0/bin/julia --project -O3 notebooks/strong_landau_damping_E0_5_vth_0p1_circ.jl >nohup_E0_5_vth_0p1.out
