@@ -20,57 +20,75 @@ Hamiltonian splitting type for Vlasov-Maxwell
 """
 struct HamiltonianSplitting
 
-    maxwell_solver    :: AbstractMaxwellSolver
-    kernel_smoother_0 :: ParticleMeshCoupling
-    kernel_smoother_1 :: ParticleMeshCoupling
-    kernel_smoother_2 :: ParticleMeshCoupling
-    particle_group    :: ParticleGroup
+    maxwell_solver::AbstractMaxwellSolver
+    kernel_smoother_0::ParticleMeshCoupling
+    kernel_smoother_1::ParticleMeshCoupling
+    kernel_smoother_2::ParticleMeshCoupling
+    particle_group::ParticleGroup
 
-    spline_degree     :: Int64
-    Lx                :: Float64
-    x_min             :: Float64
-    delta_x           :: Float64
+    spline_degree::Int64
+    Lx::Float64
+    x_min::Float64
+    delta_x::Float64
 
-    cell_integrals_0  :: SVector
-    cell_integrals_1  :: SVector
+    cell_integrals_0::SVector
+    cell_integrals_1::SVector
 
-    e_dofs :: Array{Array{Float64,1}}
-    a_dofs :: Array{Array{Float64,1}}
-    j_dofs :: Array{Array{Float64,1}}
-    part1  :: Array{Float64,1}
-    part2  :: Array{Float64,1}
-    part3  :: Array{Float64,1}
-    part4  :: Array{Float64,1}
+    e_dofs::Array{Array{Float64,1}}
+    a_dofs::Array{Array{Float64,1}}
+    j_dofs::Array{Array{Float64,1}}
+    part1::Array{Float64,1}
+    part2::Array{Float64,1}
+    part3::Array{Float64,1}
+    part4::Array{Float64,1}
 
-    function HamiltonianSplitting( maxwell_solver,
-                                   kernel_smoother_0,
-                                   kernel_smoother_1,
-                                   kernel_smoother_2,
-                                   particle_group,
-                                   e_dofs,
-                                   a_dofs,
-                                   domain :: Vector{Float64}) 
+    function HamiltonianSplitting(
+        maxwell_solver,
+        kernel_smoother_0,
+        kernel_smoother_1,
+        kernel_smoother_2,
+        particle_group,
+        e_dofs,
+        a_dofs,
+        domain::Vector{Float64},
+    )
 
         # Check that n_dofs is the same for both kernel smoothers.
         @assert kernel_smoother_0.n_dofs == kernel_smoother_1.n_dofs
 
-        j_dofs = [zeros(Float64,kernel_smoother_0.n_dofs) for i in 1:2]
+        j_dofs = [zeros(Float64, kernel_smoother_0.n_dofs) for i = 1:2]
         part1 = zeros(Float64, nx)
         part2 = zeros(Float64, nx)
         part3 = zeros(Float64, nx)
         part4 = zeros(Float64, nx)
         x_min = domain[1]
-        Lx    = domain[3]
+        Lx = domain[3]
         spline_degree = 3
-        delta_x = Lx/kernel_smoother_1.n_dofs
-        
-        cell_integrals_1 = SVector{3}([0.5, 2.0, 0.5] ./ 3.0)
-        cell_integrals_0 = SVector{4}([1.0,11.0,11.0,1.0] ./ 24.0)
+        delta_x = Lx / kernel_smoother_1.n_dofs
 
-        new( maxwell_solver, kernel_smoother_0, kernel_smoother_1, kernel_smoother_2, 
-             particle_group, spline_degree, Lx, x_min, delta_x,
-             cell_integrals_0, cell_integrals_1, e_dofs, a_dofs, j_dofs,
-            part1, part2, part3, part4)
+        cell_integrals_1 = SVector{3}([0.5, 2.0, 0.5] ./ 3.0)
+        cell_integrals_0 = SVector{4}([1.0, 11.0, 11.0, 1.0] ./ 24.0)
+
+        new(
+            maxwell_solver,
+            kernel_smoother_0,
+            kernel_smoother_1,
+            kernel_smoother_2,
+            particle_group,
+            spline_degree,
+            Lx,
+            x_min,
+            delta_x,
+            cell_integrals_0,
+            cell_integrals_1,
+            e_dofs,
+            a_dofs,
+            j_dofs,
+            part1,
+            part2,
+            part3,
+            part4,
+        )
 
     end
 
@@ -86,31 +104,29 @@ Strang splitting
 - time step
 - number of time steps
 """
-function strang_splitting!( h            :: HamiltonianSplitting,
-                           dt           :: Float64, 
-                           number_steps :: Int64)
+function strang_splitting!(h::HamiltonianSplitting, dt::Float64, number_steps::Int64)
 
     for i_step = 1:number_steps
 
-#full system fast version       
-       operatorHE(h, 0.5dt)
-       operatorHp(h, 0.5dt)
-       operatorHA(h, 0.5dt)
-       operatorHs(h, 1.0dt)
-       operatorHA(h, 0.5dt)
-       operatorHp(h, 0.5dt)
-       operatorHE(h, 0.5dt)
+        #full system fast version       
+        operatorHE(h, 0.5dt)
+        operatorHp(h, 0.5dt)
+        operatorHA(h, 0.5dt)
+        operatorHs(h, 1.0dt)
+        operatorHA(h, 0.5dt)
+        operatorHp(h, 0.5dt)
+        operatorHE(h, 0.5dt)
 
-#LP system without spin
-#       operatorHE(h, 0.5dt)
-#       operatorHA(h, 0.5dt)
-#       operatorHp(h, 1.0dt)
-#       operatorHA(h, 0.5dt)
-#       operatorHE(h, 0.5dt)
+        #LP system without spin
+        #       operatorHE(h, 0.5dt)
+        #       operatorHA(h, 0.5dt)
+        #       operatorHp(h, 1.0dt)
+        #       operatorHA(h, 0.5dt)
+        #       operatorHE(h, 0.5dt)
 
     end
 
-end 
+end
 
 export lie_splitting!
 """
@@ -118,9 +134,7 @@ export lie_splitting!
 
 Lie splitting
 """
-function lie_splitting!(h            :: HamiltonianSplitting,
-                        dt           :: Float64, 
-                        number_steps :: Int64)
+function lie_splitting!(h::HamiltonianSplitting, dt::Float64, number_steps::Int64)
 
     for i_step = 1:number_steps
         operatorHs(h, dt)
@@ -129,7 +143,7 @@ function lie_splitting!(h            :: HamiltonianSplitting,
         operatorHA(h, dt)
     end
 
-end 
+end
 
 export lie_splitting_back!
 """
@@ -137,21 +151,19 @@ export lie_splitting_back!
 
 Lie splitting (oposite ordering)
 """
-function lie_splitting_back!(h            :: HamiltonianSplitting,
-                             dt           :: Float64, 
-                             number_steps :: Int64)
+function lie_splitting_back!(h::HamiltonianSplitting, dt::Float64, number_steps::Int64)
 
     for i_step = 1:number_steps
 
-       operatorHA(h, dt)
-       operatorHp(h, dt)
-       operatorHE(h, dt)
-       operatorHs(h, dt)
+        operatorHA(h, dt)
+        operatorHp(h, dt)
+        operatorHE(h, dt)
+        operatorHs(h, dt)
 
     end
 
 end
-  
+
 
 """
     operatorHp(h, dt)
@@ -163,30 +175,38 @@ end
 ```
 """
 
-function operatorHp(h :: HamiltonianSplitting, dt :: Float64)
+function operatorHp(h::HamiltonianSplitting, dt::Float64)
 
     n_cells = h.kernel_smoother_0.n_dofs
 
     fill!(h.j_dofs[1], 0.0)
     fill!(h.j_dofs[2], 0.0)
 
-    for i_part = 1:h.particle_group.n_particles  
+    for i_part = 1:h.particle_group.n_particles
 
-       # Read out particle position and velocity
-       x_old = get_x(h.particle_group, i_part)
-       vi    = get_v(h.particle_group, i_part)
-        
-       # Then update particle position:  X_new = X_old + dt * V
-       x_new = x_old .+ dt * vi
+        # Read out particle position and velocity
+        x_old = get_x(h.particle_group, i_part)
+        vi = get_v(h.particle_group, i_part)
 
-       # Get charge for accumulation of j
-       wi     = get_charge(h.particle_group, i_part)
-       qoverm = h.particle_group.q_over_m
+        # Then update particle position:  X_new = X_old + dt * V
+        x_new = x_old .+ dt * vi
 
-       add_current_update_v!(h.j_dofs[1], h.kernel_smoother_1, x_old, x_new, wi[1], qoverm, vi)
-      
-       x_new[1] = mod(x_new[1], h.Lx)
-       set_x(h.particle_group, i_part, x_new)       
+        # Get charge for accumulation of j
+        wi = get_charge(h.particle_group, i_part)
+        qoverm = h.particle_group.q_over_m
+
+        add_current_update_v!(
+            h.j_dofs[1],
+            h.kernel_smoother_1,
+            x_old,
+            x_new,
+            wi[1],
+            qoverm,
+            vi,
+        )
+
+        x_new[1] = mod(x_new[1], h.Lx)
+        set_x(h.particle_group, i_part, x_new)
 
     end
 
@@ -207,64 +227,64 @@ end
 ```
 """
 
-function operatorHA(h :: HamiltonianSplitting, dt :: Float64)
-    
+function operatorHA(h::HamiltonianSplitting, dt::Float64)
+
     n_cells = h.kernel_smoother_0.n_dofs
     fill!(h.part1, 0.0)
     fill!(h.part2, 0.0)
     fill!(h.part3, 0.0)
     fill!(h.part4, 0.0)
-    aa = zeros(Float64,n_cells)
+    aa = zeros(Float64, n_cells)
 
 
     qm = h.particle_group.q_over_m
     # Update v_1
-    for i_part=1:h.particle_group.n_particles
+    for i_part = 1:h.particle_group.n_particles
 
-       fill!(h.j_dofs[1], 0.0)
-       fill!(h.j_dofs[2], 0.0)
+        fill!(h.j_dofs[1], 0.0)
+        fill!(h.j_dofs[2], 0.0)
 
-       xi    = get_x(h.particle_group, i_part)       
-       vi    = get_v(h.particle_group, i_part)        
-       wi = get_charge(h.particle_group, i_part)
-       
-       add_charge!( h.j_dofs[2], h.kernel_smoother_0, xi, 1.0)
-       add_charge!( h.j_dofs[1], h.kernel_smoother_1, xi, 1.0) 
+        xi = get_x(h.particle_group, i_part)
+        vi = get_v(h.particle_group, i_part)
+        wi = get_charge(h.particle_group, i_part)
 
-       # values of the derivatives of basis function
-       compute_derivatives_from_basis!(aa, h.maxwell_solver, h.j_dofs[1])
-       h.j_dofs[1] .= aa
+        add_charge!(h.j_dofs[2], h.kernel_smoother_0, xi, 1.0)
+        add_charge!(h.j_dofs[1], h.kernel_smoother_1, xi, 1.0)
 
-       vi = vi - dt/2*(h.a_dofs[1]'*h.j_dofs[1] * (h.j_dofs[2]'*h.a_dofs[1]))
-       vi = vi - dt/2*(h.a_dofs[1]'*h.j_dofs[2] * (h.j_dofs[1]'*h.a_dofs[1]))
-       vi = vi - dt/2*(h.a_dofs[2]'*h.j_dofs[1] * (h.j_dofs[2]'*h.a_dofs[2]))
-       vi = vi - dt/2*(h.a_dofs[2]'*h.j_dofs[2] * (h.j_dofs[1]'*h.a_dofs[2]))
-        
-       set_v(h.particle_group, i_part, vi)
-        
-       # below we solve electric field
-       # first define part1 and part2 to be 0 vector
-       h.part1 .= h.part1 .+ dt*wi*(h.j_dofs[2]'*h.a_dofs[1])*h.j_dofs[2]
-       h.part2 .= h.part2 .+ dt*wi*(h.j_dofs[2]'*h.a_dofs[2])*h.j_dofs[2]
-       
+        # values of the derivatives of basis function
+        compute_derivatives_from_basis!(aa, h.maxwell_solver, h.j_dofs[1])
+        h.j_dofs[1] .= aa
+
+        vi = vi - dt / 2 * (h.a_dofs[1]' * h.j_dofs[1] * (h.j_dofs[2]' * h.a_dofs[1]))
+        vi = vi - dt / 2 * (h.a_dofs[1]' * h.j_dofs[2] * (h.j_dofs[1]' * h.a_dofs[1]))
+        vi = vi - dt / 2 * (h.a_dofs[2]' * h.j_dofs[1] * (h.j_dofs[2]' * h.a_dofs[2]))
+        vi = vi - dt / 2 * (h.a_dofs[2]' * h.j_dofs[2] * (h.j_dofs[1]' * h.a_dofs[2]))
+
+        set_v(h.particle_group, i_part, vi)
+
+        # below we solve electric field
+        # first define part1 and part2 to be 0 vector
+        h.part1 .= h.part1 .+ dt * wi * (h.j_dofs[2]' * h.a_dofs[1]) * h.j_dofs[2]
+        h.part2 .= h.part2 .+ dt * wi * (h.j_dofs[2]' * h.a_dofs[2]) * h.j_dofs[2]
+
 
     end
 
     # Update the electric field 
     # with the (A rho) part 
-    
-    compute_e_from_j!( h.e_dofs[2], h.maxwell_solver, -h.part1, 2)
-    compute_e_from_j!( h.e_dofs[3], h.maxwell_solver, -h.part2, 2)
+
+    compute_e_from_j!(h.e_dofs[2], h.maxwell_solver, -h.part1, 2)
+    compute_e_from_j!(h.e_dofs[3], h.maxwell_solver, -h.part2, 2)
 
     # with the (d^2 A/ dx^2) part 
 
     compute_derivatives_from_basis2!(h.part3, h.maxwell_solver, h.a_dofs[1])
     compute_derivatives_from_basis2!(h.part4, h.maxwell_solver, h.a_dofs[2])
-    
-    compute_e_from_b!( h.e_dofs[2], h.maxwell_solver, dt, h.part3)
-    compute_e_from_b!( h.e_dofs[3], h.maxwell_solver, dt, h.part4)
-    
-    
+
+    compute_e_from_b!(h.e_dofs[2], h.maxwell_solver, dt, h.part3)
+    compute_e_from_b!(h.e_dofs[3], h.maxwell_solver, dt, h.part4)
+
+
 end
 
 
@@ -279,27 +299,27 @@ end
 ```
 """
 
-function operatorHE(h :: HamiltonianSplitting, dt :: Float64)
+function operatorHE(h::HamiltonianSplitting, dt::Float64)
 
 
-    for i_part=1:h.particle_group.n_particles
+    for i_part = 1:h.particle_group.n_particles
 
-        vi    = get_v(h.particle_group, i_part)
-        
+        vi = get_v(h.particle_group, i_part)
+
         xi = get_x(h.particle_group, i_part)
         e1 = evaluate(h.kernel_smoother_1, xi[1], h.e_dofs[1])
-        vi = vi + dt  * e1;  
-        
-       set_v(h.particle_group, i_part, vi)
+        vi = vi + dt * e1
+
+        set_v(h.particle_group, i_part, vi)
 
     end
 
-    h.a_dofs[1] = h.a_dofs[1] .- dt*h.e_dofs[2];
-    h.a_dofs[2] = h.a_dofs[2] .- dt*h.e_dofs[3];
-    
+    h.a_dofs[1] = h.a_dofs[1] .- dt * h.e_dofs[2]
+    h.a_dofs[2] = h.a_dofs[2] .- dt * h.e_dofs[3]
+
 end
 
-  
+
 """
     operatorHs(h, dt)
 Push H_s: Equations to be solved
@@ -313,7 +333,7 @@ Push H_s: Equations to be solved
 ```
 """
 
-function operatorHs(h :: HamiltonianSplitting, dt :: Float64)
+function operatorHs(h::HamiltonianSplitting, dt::Float64)
     HH = 0.00022980575
     n_cells = h.kernel_smoother_0.n_dofs
     fill!(h.part1, 0.0)
@@ -321,88 +341,98 @@ function operatorHs(h :: HamiltonianSplitting, dt :: Float64)
     fill!(h.part3, 0.0)
     fill!(h.part4, 0.0)
     hat_v = zeros(Float64, 3, 3)
-    S = zeros(Float64,3)
-    St = zeros(Float64,3)
-    aa = zeros(Float64,n_cells)
+    S = zeros(Float64, 3)
+    St = zeros(Float64, 3)
+    aa = zeros(Float64, n_cells)
 
-    
-    for i_part=1:h.particle_group.n_particles
 
-       v_new = get_v( h.particle_group, i_part)
-        
-       # Evaluate efields at particle position
-       xi = get_x(h.particle_group, i_part)
-       fill!(h.j_dofs[1], 0.0)
-       fill!(h.j_dofs[2], 0.0)
+    for i_part = 1:h.particle_group.n_particles
 
-       add_charge!( h.j_dofs[2], h.kernel_smoother_1, xi, 1.0)
+        v_new = get_v(h.particle_group, i_part)
 
-       compute_derivatives_from_basis!(h.j_dofs[1], h.maxwell_solver, h.j_dofs[2])
+        # Evaluate efields at particle position
+        xi = get_x(h.particle_group, i_part)
+        fill!(h.j_dofs[1], 0.0)
+        fill!(h.j_dofs[2], 0.0)
 
-       Y = h.a_dofs[1]'*h.j_dofs[1]
-       Z = h.a_dofs[2]'*h.j_dofs[1]
-       V = [0,Z,-Y];
+        add_charge!(h.j_dofs[2], h.kernel_smoother_1, xi, 1.0)
 
-       hat_v[1,2] = Y;
-       hat_v[1,3] = Z;
-       hat_v[2,1] = -Y;
-       hat_v[3,1] = -Z;
+        compute_derivatives_from_basis!(h.j_dofs[1], h.maxwell_solver, h.j_dofs[2])
 
-       s1 = get_s1(h.particle_group, i_part)
-       s2 = get_s2(h.particle_group, i_part)
-       s3 = get_s3(h.particle_group, i_part)
+        Y = h.a_dofs[1]' * h.j_dofs[1]
+        Z = h.a_dofs[2]' * h.j_dofs[1]
+        V = [0, Z, -Y]
 
-       vnorm=norm(V)
+        hat_v[1, 2] = Y
+        hat_v[1, 3] = Z
+        hat_v[2, 1] = -Y
+        hat_v[3, 1] = -Z
 
-       if vnorm>1e-14
-           S .= [s1, s2, s3] .+
-       	       ( sin(dt*norm(V))/norm(V)*hat_v + 0.5* (sin(dt/2*norm(V))/(norm(V)/2))^2*hat_v^2 )*[s1, s2, s3]
-       else
-           S .= [s1, s2, s3]
-       end
+        s1 = get_s1(h.particle_group, i_part)
+        s2 = get_s2(h.particle_group, i_part)
+        s3 = get_s3(h.particle_group, i_part)
 
-       set_s1(h.particle_group, i_part, S[1])
-       set_s2(h.particle_group, i_part, S[2])
-       set_s3(h.particle_group, i_part, S[3])
-       
-       if vnorm>1e-14
-           St .= dt*[s1, s2, s3] .+
-	       ( 2*(sin(dt*norm(V)/2)/norm(V))^2*hat_v + 2.0/(norm(V)^2)*(dt/2-  sin(dt*norm(V))/2/norm(V)  )*hat_v^2 )*[s1, s2, s3]
-       else
-           St .= dt*[s1,s2,s3]
-       end
-        
-       wi = get_charge(h.particle_group, i_part) 
+        vnorm = norm(V)
 
-       # define part1 and part2
-       h.part1 .= h.part1 .+ wi[1]*St[3]*h.j_dofs[2]
-       h.part2 .= h.part2 .+ wi[1]*St[2]*h.j_dofs[2]
-        
-       # update velocity
-       fill!(h.j_dofs[2], 0.0)
-       add_charge!( h.j_dofs[2], h.kernel_smoother_2, xi, 1.0)
-       compute_derivatives_from_basis!(h.j_dofs[1], h.maxwell_solver, h.j_dofs[2])
-       compute_derivatives_from_basis!(aa, h.maxwell_solver, h.j_dofs[1])
-       h.j_dofs[1] .= aa
+        if vnorm > 1e-14
+            S .=
+                [s1, s2, s3] .+
+                (
+                    sin(dt * norm(V)) / norm(V) * hat_v +
+                    0.5 * (sin(dt / 2 * norm(V)) / (norm(V) / 2))^2 * hat_v^2
+                ) * [s1, s2, s3]
+        else
+            S .= [s1, s2, s3]
+        end
 
-       vi = v_new - HH  * h.a_dofs[2]'*h.j_dofs[1] * St[2] + HH * h.a_dofs[1]'*h.j_dofs[1] * St[3]
+        set_s1(h.particle_group, i_part, S[1])
+        set_s2(h.particle_group, i_part, S[2])
+        set_s3(h.particle_group, i_part, S[3])
 
-       set_v(h.particle_group, i_part, vi)
-        
+        if vnorm > 1e-14
+            St .=
+                dt * [s1, s2, s3] .+
+                (
+                    2 * (sin(dt * norm(V) / 2) / norm(V))^2 * hat_v +
+                    2.0 / (norm(V)^2) *
+                    (dt / 2 - sin(dt * norm(V)) / 2 / norm(V)) *
+                    hat_v^2
+                ) * [s1, s2, s3]
+        else
+            St .= dt * [s1, s2, s3]
+        end
+
+        wi = get_charge(h.particle_group, i_part)
+
+        # define part1 and part2
+        h.part1 .= h.part1 .+ wi[1] * St[3] * h.j_dofs[2]
+        h.part2 .= h.part2 .+ wi[1] * St[2] * h.j_dofs[2]
+
+        # update velocity
+        fill!(h.j_dofs[2], 0.0)
+        add_charge!(h.j_dofs[2], h.kernel_smoother_2, xi, 1.0)
+        compute_derivatives_from_basis!(h.j_dofs[1], h.maxwell_solver, h.j_dofs[2])
+        compute_derivatives_from_basis!(aa, h.maxwell_solver, h.j_dofs[1])
+        h.j_dofs[1] .= aa
+
+        vi =
+            v_new - HH * h.a_dofs[2]' * h.j_dofs[1] * St[2] +
+            HH * h.a_dofs[1]' * h.j_dofs[1] * St[3]
+
+        set_v(h.particle_group, i_part, vi)
+
 
     end
-    
+
     # Update Ey with the term  HH*int (sz df/dx) dp ds  
     # Update Ez with the term -HH*int (sy df/dx) dp ds  
 
-    aa = zeros(Float64,n_cells)
-    bb = zeros(Float64,n_cells)
+    aa = zeros(Float64, n_cells)
+    bb = zeros(Float64, n_cells)
     compute_derivatives_from_basis!(aa, h.maxwell_solver, h.part1)
     compute_derivatives_from_basis!(bb, h.maxwell_solver, -h.part2)
-    
-    compute_e_from_j!( h.e_dofs[2], h.maxwell_solver, HH .* aa, 2) 
-    compute_e_from_j!( h.e_dofs[3], h.maxwell_solver, HH .* bb, 2)
-        
-end
-  
 
+    compute_e_from_j!(h.e_dofs[2], h.maxwell_solver, HH .* aa, 2)
+    compute_e_from_j!(h.e_dofs[3], h.maxwell_solver, HH .* bb, 2)
+
+end
