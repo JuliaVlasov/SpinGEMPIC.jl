@@ -4,6 +4,7 @@ using Plots
 using ProgressMeter
 using Random
 using SpinGEMPIC
+using TimerOutputs
 
 import SpinGEMPIC: set_common_weight
 import SpinGEMPIC: get_s1, get_s2, get_s3
@@ -11,8 +12,15 @@ import SpinGEMPIC: set_s1, set_s2, set_s3
 import SpinGEMPIC: set_weights, get_weights
 import SpinGEMPIC: set_x, set_v
 
+import SpinGEMPIC: operatorHE
+import SpinGEMPIC: operatorHp
+import SpinGEMPIC: operatorHA
+import SpinGEMPIC: operatorHs
+
 import GEMPIC: OneDGrid, Maxwell1DFEM
 import GEMPIC: l2projection!
+
+const to = TimerOutput()
 
 """
 Test corresponding to Fig. 4 of the JPP paper 
@@ -87,7 +95,14 @@ function run_simulation( steps, Δt)
     
     @showprogress 1 for j = 1:steps # loop over time
     
-        strang_splitting!(propagator, Δt, 1)
+        @timeit to "HE" operatorHE(propagator, 0.5Δt)
+        @timeit to "Hp" operatorHp(propagator, 0.5Δt)
+        @timeit to "HA" operatorHA(propagator, 0.5Δt)
+        @timeit to "Hs" operatorHs(propagator, 1.0Δt)
+        @timeit to "HA" operatorHA(propagator, 0.5Δt)
+        @timeit to "Hp" operatorHp(propagator, 0.5Δt)
+        @timeit to "HE" operatorHE(propagator, 0.5Δt)
+
     
         write_step!(thdiag, j * Δt, spline_degree, 
                         efield_dofs,  afield_dofs,
@@ -101,6 +116,9 @@ end
 steps, Δt = 100, 0.05
 
 thdiag = run_simulation(steps, Δt)
+
+show(to)
+
 ref = CSV.read("frame.csv", DataFrame)
 
 time = thdiag.data[!, :Time]
