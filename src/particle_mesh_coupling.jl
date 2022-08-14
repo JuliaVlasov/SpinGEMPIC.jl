@@ -2,6 +2,7 @@ using FastGaussQuadrature
 
 import GEMPIC: SplinePP
 import GEMPIC: uniform_bsplines_eval_basis
+import GEMPIC: uniform_bsplines_eval_basis!
 import GEMPIC: horner_1d
 import GEMPIC: AbstractParticleMeshCoupling
 
@@ -118,22 +119,22 @@ Add charge of one particle
 function add_charge!(
     rho_dofs::Vector{Float64},
     p::ParticleMeshCoupling,
-    position,
+    position::Float64,
     marker_charge::Float64,
 )
-
-    xi = (position[1] - p.domain[1]) / p.delta_x[1]
-    index = floor(Int64, xi) + 1
-    xi = xi - (index - 1)
+    xi = (position - p.domain[1]) / p.delta_x
+    index = trunc(Int, xi)
+    xi = xi - index
     index = index - p.spline_degree
 
-    p.spline_val .= uniform_bsplines_eval_basis(p.spline_degree, xi)
+    uniform_bsplines_eval_basis!(p.spline_val, p.spline_degree, xi)
 
-    @inbounds for i = 1:p.n_span
-        index1d = mod(index + i - 2, p.n_grid[1]) + 1
+    nx = p.n_grid[1]
+
+    @inbounds for i in 1:(p.n_span)
+        index1d = mod1(index + i, nx)
         rho_dofs[index1d] += marker_charge * p.spline_val[i] * p.scaling
     end
-
 end
 
 """
@@ -243,21 +244,19 @@ function update_jv!(
     vi::Float64,
 )
 
-
     n_cells = p.n_grid[1]
 
     c1 = 0.5 * (upper - lower)
     c2 = 0.5 * (upper + lower)
 
-    p.spline_val .= uniform_bsplines_eval_basis(p.spline_degree, c1 * p.quad_x[1] + c2)
+    uniform_bsplines_eval_basis!(p.spline_val, p.spline_degree, c1 * p.quad_x[1] + c2)
 
     p.spline_val .*= p.quad_w[1] * c1
 
 
     @inbounds for j = 2:p.n_quad_points
 
-        p.spline_val_more .=
-            uniform_bsplines_eval_basis(p.spline_degree, c1 * p.quad_x[j] + c2)
+        uniform_bsplines_eval_basis!(p.spline_val_more, p.spline_degree, c1 * p.quad_x[j] + c2)
 
         p.spline_val .+= p.spline_val_more .* p.quad_w[j] .* c1
 
@@ -269,7 +268,6 @@ function update_jv!(
     @inbounds for i_grid = index-p.spline_degree:index
         i_mod = mod(i_grid, n_cells) + 1
         j_dofs[i_mod] += marker_charge * p.spline_val[ind] * p.scaling
-        vi = vi
         ind = ind + 1
     end
 

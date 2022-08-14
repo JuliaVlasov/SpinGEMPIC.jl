@@ -89,9 +89,9 @@ Get velocity of ith particle of p
 
 Get charge of ith particle of p (q * particle_weight)
 """
-@generated function get_charge(p::ParticleGroup{D,V,S}, i::Int64; i_wi = 1) where {D,V,S}
+@inline function get_charge(p::ParticleGroup{D,V,S}, i::Int64; i_wi = 1) where {D,V,S}
 
-    :(p.charge * p.array[$D+$V+$S+i_wi, i] * p.common_weight)
+    p.charge * p.array[5+i_wi, i] * p.common_weight
 
 end
 

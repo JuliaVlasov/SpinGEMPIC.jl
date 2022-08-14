@@ -154,14 +154,14 @@ function operatorHp(h::HamiltonianSplitting, dt::Float64)
     for i_part = 1:h.particle_group.n_particles
 
         # Read out particle position and velocity
-        x_old = get_x(h.particle_group, i_part)
-        vi = get_v(h.particle_group, i_part)
+        x_old = h.particle_group.array[1, i_part]
+        vi = h.particle_group.array[2, i_part]
 
         # Then update particle position:  X_new = X_old + dt * V
-        x_new = x_old .+ dt * vi
+        x_new = x_old + dt * vi
 
         # Get charge for accumulation of j
-        wi = get_charge(h.particle_group, i_part)
+        wi = h.particle_group.charge * h.particle_group.array[6, i_part] * h.particle_group.common_weight
         qoverm = h.particle_group.q_over_m
 
         add_current_update_v!(
@@ -213,9 +213,9 @@ function operatorHA(h::HamiltonianSplitting, dt::Float64)
         fill!(h.j_dofs[1], 0.0)
         fill!(h.j_dofs[2], 0.0)
 
-        xi = get_x(h.particle_group, i_part)
-        vi = get_v(h.particle_group, i_part)
-        wi = get_charge(h.particle_group, i_part)
+        xi = h.particle_group.array[1, i_part]
+        vi = h.particle_group.array[2, i_part]
+        wi = h.particle_group.charge * h.particle_group.array[6, i_part] * h.particle_group.common_weight
 
         add_charge!(h.j_dofs[2], h.kernel_smoother_0, xi, 1.0)
         add_charge!(h.j_dofs[1], h.kernel_smoother_1, xi, 1.0)
@@ -229,12 +229,12 @@ function operatorHA(h::HamiltonianSplitting, dt::Float64)
         vi = vi - dt / 2 * (h.a_dofs[2]' * h.j_dofs[1] * (h.j_dofs[2]' * h.a_dofs[2]))
         vi = vi - dt / 2 * (h.a_dofs[2]' * h.j_dofs[2] * (h.j_dofs[1]' * h.a_dofs[2]))
 
-        set_v(h.particle_group, i_part, vi)
+        h.particle_group.array[2,i_part] = vi
 
         # below we solve electric field
         # first define part1 and part2 to be 0 vector
-        h.part1 .= h.part1 .+ dt * wi * (h.j_dofs[2]' * h.a_dofs[1]) * h.j_dofs[2]
-        h.part2 .= h.part2 .+ dt * wi * (h.j_dofs[2]' * h.a_dofs[2]) * h.j_dofs[2]
+        h.part1 .+= dt * wi * (h.j_dofs[2]' * h.a_dofs[1]) * h.j_dofs[2]
+        h.part2 .+= dt * wi * (h.j_dofs[2]' * h.a_dofs[2]) * h.j_dofs[2]
 
 
     end
@@ -273,12 +273,12 @@ function operatorHE(h::HamiltonianSplitting, dt::Float64)
 
     for i_part = 1:h.particle_group.n_particles
 
-        vi = get_v(h.particle_group, i_part)
-        xi = get_x(h.particle_group, i_part)
+        xi = h.particle_group.array[1, i_part]
+        vi = h.particle_group.array[2, i_part]
         e1 = evaluate(h.kernel_smoother_1, xi[1], h.e_dofs[1])
         vi = vi + dt * e1
 
-        set_v(h.particle_group, i_part, vi)
+        h.particle_group.array[2,i_part] = vi
 
     end
 
@@ -308,19 +308,20 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
     fill!(h.part2, 0.0)
     fill!(h.part3, 0.0)
     fill!(h.part4, 0.0)
-    hat_v = zeros(Float64, 3, 3)
-    S = zeros(Float64, 3)
-    St = zeros(Float64, 3)
-    aa = zeros(Float64, n_cells)
-    bb = zeros(Float64, n_cells)
+    hat_v = zeros(3, 3)
+    S = zeros(3)
+    St = zeros(3)
+    V = zeros(3)
+    aa = zeros(n_cells)
+    bb = zeros(n_cells)
 
 
     for i_part = 1:h.particle_group.n_particles
 
-        v_new = get_v(h.particle_group, i_part)
+        v_new = h.particle_group.array[2, i_part]
 
         # Evaluate efields at particle position
-        xi = get_x(h.particle_group, i_part)
+        xi = h.particle_group.array[1, i_part]
         fill!(h.j_dofs[1], 0.0)
         fill!(h.j_dofs[2], 0.0)
 
@@ -330,48 +331,35 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
 
         Y = h.a_dofs[1]' * h.j_dofs[1]
         Z = h.a_dofs[2]' * h.j_dofs[1]
-        V = [0, Z, -Y]
+        V .= [0, Z, -Y]
 
         hat_v[1, 2] = Y
         hat_v[1, 3] = Z
         hat_v[2, 1] = -Y
         hat_v[3, 1] = -Z
 
-        s1 = get_s1(h.particle_group, i_part)
-        s2 = get_s2(h.particle_group, i_part)
-        s3 = get_s3(h.particle_group, i_part)
+        s1 = h.particle_group.array[3, i_part]
+        s2 = h.particle_group.array[4, i_part]
+        s3 = h.particle_group.array[5, i_part]
 
         vnorm = norm(V)
 
-        if vnorm > 1e-14
-            S .=
-                [s1, s2, s3] .+
+        S .= [s1, s2, s3] .+
+                ( sin(dt * vnorm) / vnorm * hat_v +
+                    0.5 * (sin(dt / 2 * vnorm) / (vnorm / 2))^2 * hat_v^2
+               ) * [s1, s2, s3]
+
+        h.particle_group.array[3, i_part] = S[1]
+        h.particle_group.array[4, i_part] = S[2]
+        h.particle_group.array[5, i_part] = S[3]
+
+        St .= dt .* [s1, s2, s3] .+
                 (
-                    sin(dt * norm(V)) / norm(V) * hat_v +
-                    0.5 * (sin(dt / 2 * norm(V)) / (norm(V) / 2))^2 * hat_v^2
+                    2 * (sin(dt * vnorm / 2) / vnorm)^2 * hat_v + 2.0 / (vnorm^2) *
+                    (dt / 2 - sin(dt * vnorm) / 2 / vnorm) * hat_v^2
                 ) * [s1, s2, s3]
-        else
-            S .= [s1, s2, s3]
-        end
 
-        set_s1(h.particle_group, i_part, S[1])
-        set_s2(h.particle_group, i_part, S[2])
-        set_s3(h.particle_group, i_part, S[3])
-
-        if vnorm > 1e-14
-            St .=
-                dt * [s1, s2, s3] .+
-                (
-                    2 * (sin(dt * norm(V) / 2) / norm(V))^2 * hat_v +
-                    2.0 / (norm(V)^2) *
-                    (dt / 2 - sin(dt * norm(V)) / 2 / norm(V)) *
-                    hat_v^2
-                ) * [s1, s2, s3]
-        else
-            St .= dt * [s1, s2, s3]
-        end
-
-        wi = get_charge(h.particle_group, i_part)
+        wi = h.particle_group.charge * h.particle_group.array[6, i_part] * h.particle_group.common_weight
 
         # define part1 and part2
         h.part1 .= h.part1 .+ wi[1] * St[3] * h.j_dofs[2]
@@ -384,11 +372,10 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
         compute_rderivatives_from_basis!(aa, h.maxwell_solver, h.j_dofs[1])
         h.j_dofs[1] .= aa
 
-        vi =
-            v_new - HH * h.a_dofs[2]' * h.j_dofs[1] * St[2] +
+        vi = v_new - HH * h.a_dofs[2]' * h.j_dofs[1] * St[2] +
             HH * h.a_dofs[1]' * h.j_dofs[1] * St[3]
 
-        set_v(h.particle_group, i_part, vi)
+        h.particle_group.array[2, i_part] = vi
 
 
     end

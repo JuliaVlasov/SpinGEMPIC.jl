@@ -121,16 +121,6 @@ function run_simulation( steps, Δt)
     thdiag = TimeHistoryDiagnostics( particle_group, maxwell_solver, 
                             kernel_smoother0, kernel_smoother1 );
     
-    mode1 = zeros(ComplexF64,steps)
-    mode2 = zeros(ComplexF64,steps)
-    store = zeros(ComplexF64,nx)
-    
-    # Diagnostics parameters 
-    test = zeros(Float64,nx)
-    nengliang = zeros(Float64,steps)
-    xp = vcat([get_x(particle_group, i) for i in 1:n_particles]...)
-    vp = vcat([get_v(particle_group, i) for i in 1:n_particles]'...)
-    
     write_step!(thdiag, 0.0, spline_degree,
                         efield_dofs,  afield_dofs,
                         efield_dofs_n, efield_poisson, propagator)
@@ -142,14 +132,13 @@ function run_simulation( steps, Δt)
         write_step!(thdiag, j * Δt, spline_degree, 
                         efield_dofs,  afield_dofs,
                         efield_dofs_n, efield_poisson, propagator)
-    
     end
 
     return thdiag
 
 end
 
-steps, Δt = 100, 0.05
+steps, Δt = 300, 0.05
 
 thdiag = run_simulation(steps, Δt)
 ref = CSV.read("frame.csv", DataFrame)
