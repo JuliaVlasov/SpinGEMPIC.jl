@@ -10,10 +10,9 @@ Geometric Particle-in-Cell methods for the Vlasov-Maxwell equations with spin ef
 
 The dimensionless non-relativistic spin Vlasov-Maxwell system is
 the Vlasov equation:
+
 $$
-\begin{gather}
 \frac{\partial f}{\partial t}+{\bf v}\cdot\frac{\partial f}{\partial{\bf x}}+[\left({\bf E}+{\bf v}\times{\bf B}\right) - \nabla({\bf s} \cdot {\bf B})]\cdot\frac{\partial f}{\partial{\bf v}} - ({\bf s}\times {\bf B}) \cdot \frac{\partial f}{\partial {\bf s}} = 0, 
-\end{gather}
 $$
 
 coupled with Maxwell equations.
