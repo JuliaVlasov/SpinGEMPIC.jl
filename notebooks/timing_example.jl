@@ -113,7 +113,7 @@ function run_simulation( steps, Δt)
 
 end
 
-steps, Δt = 100, 0.05
+steps, Δt = 500, 0.05
 
 thdiag = run_simulation(steps, Δt)
 
