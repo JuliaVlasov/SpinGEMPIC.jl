@@ -18,7 +18,8 @@ export HamiltonianSplitting
 """
     HamiltonianSplitting( maxwell_solver,
                           kernel_smoother_0, kernel_smoother_1,
-                          particle_group, e_dofs, b_dofs, domain) 
+                          kernel_smoother_2,
+                          particle_group, e_dofs, a_dofs, domain) 
 
 Hamiltonian splitting type for Vlasov-Maxwell
 
@@ -173,7 +174,7 @@ function operatorHp(h::HamiltonianSplitting, dt::Float64)
             vi,
         )
 
-        x_new[1] = mod(x_new[1], h.Lx)
+        x_new = mod(x_new, h.Lx)
         set_x(h.particle_group, i_part, x_new)
 
     end
@@ -273,7 +274,6 @@ function operatorHE(h::HamiltonianSplitting, dt::Float64)
     for i_part = 1:h.particle_group.n_particles
 
         vi = get_v(h.particle_group, i_part)
-
         xi = get_x(h.particle_group, i_part)
         e1 = evaluate(h.kernel_smoother_1, xi[1], h.e_dofs[1])
         vi = vi + dt * e1
@@ -282,8 +282,8 @@ function operatorHE(h::HamiltonianSplitting, dt::Float64)
 
     end
 
-    h.a_dofs[1] = h.a_dofs[1] .- dt * h.e_dofs[2]
-    h.a_dofs[2] = h.a_dofs[2] .- dt * h.e_dofs[3]
+    h.a_dofs[1] .= h.a_dofs[1] .- dt * h.e_dofs[2]
+    h.a_dofs[2] .= h.a_dofs[2] .- dt * h.e_dofs[3]
 
 end
 
@@ -312,6 +312,7 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
     S = zeros(Float64, 3)
     St = zeros(Float64, 3)
     aa = zeros(Float64, n_cells)
+    bb = zeros(Float64, n_cells)
 
 
     for i_part = 1:h.particle_group.n_particles
@@ -395,8 +396,6 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
     # Update Ey with the term  HH*int (sz df/dx) dp ds  
     # Update Ez with the term -HH*int (sy df/dx) dp ds  
 
-    aa = zeros(Float64, n_cells)
-    bb = zeros(Float64, n_cells)
     compute_rderivatives_from_basis!(aa, h.maxwell_solver, h.part1)
     compute_rderivatives_from_basis!(bb, h.maxwell_solver, -h.part2)
 

@@ -7,8 +7,14 @@ The dimensionless non-relativistic spin Vlasov-Maxwell system is
 #### [Vlasov equation](@id vlasov)
 
 ```math
+\begin{equation}
+\label{eq:Vlasovn}
+\frac{\partial f}{\partial t}+{\bf v}\cdot\frac{\partial f}{\partial{\bf x}}+[\left({\bf E}+{\bf v}\times{\bf B}\right) - \nabla({\bf s} \cdot {\bf B})]\cdot\frac{\partial f}{\partial{\bf v}} - ({\bf s}\times {\bf B}) \cdot \frac{\partial f}{\partial {\bf s}} = 0, 
+\end{equation}
+```
+
+```math
 \begin{gather}
-\frac{\partial f}{\partial t}+{\bf v}\cdot\frac{\partial f}{\partial{\bf x}}+[\left({\bf E}+{\bf v}\times{\bf B}\right) - \nabla({\bf s} \cdot {\bf B})]\cdot\frac{\partial f}{\partial{\bf v}} - ({\bf s}\times {\bf B}) \cdot \frac{\partial f}{\partial {\bf s}} = 0, \label{eq:Vlasovn}\\
 \frac{\partial{\bf E}}{\partial t}  =  \nabla\times{\bf B}-{\bf J}, \label{eq:MaxwellEn} \\
 \frac{\partial{\bf B}}{\partial t}  =  - \nabla\times{\bf E} \label{eq:MaxwellBn}  \\
 \nabla\cdot{\bf E}  = \rho-1, \label{eq:divEn} \\
@@ -16,10 +22,23 @@ The dimensionless non-relativistic spin Vlasov-Maxwell system is
 \end{gather}
 ```
 
-with ${\bf J}({\bf x}, t) =\int_{\mathbb{R}^3\times \mathbb{R}^3} {\bf v}f({\bf x}, {\bf v},{\bf s}, t) \mathrm{d}{\bf v}\mathrm{d}{\bf s} - \nabla \times {\bf M}({\bf x}, t)$, ${\bf M}({\bf x}, t) = \int_{\mathbb{R}^3\times \mathbb{R}^3} {\bf s}f({\bf x}, {\bf v},{\bf s}, t) \mathrm{d}{\bf v}\mathrm{d}{\bf s}$, $\rho({\bf x}, t)=\int_{\mathbb{R}^3} f({\bf x}, {\bf v},{\bf s}, t) \mathrm{d}{\bf v}\mathrm{d}{\bf s}$, $\nabla$ here represents the gradient about ${\bf x}$.
+with 
+```math
+{\bf J}({\bf x}, t) =\int_{\mathbb{R}^3\times \mathbb{R}^3} {\bf v}f({\bf x}, {\bf v},{\bf s}, t) \mathrm{d}{\bf v}\mathrm{d}{\bf s} - \nabla \times {\bf M}({\bf x}, t),
+``` 
+
+```math
+{\bf M}({\bf x}, t) = \int_{\mathbb{R}^3\times \mathbb{R}^3} {\bf s}f({\bf x}, {\bf v},{\bf s}, t) \mathrm{d}{\bf v}\mathrm{d}{\bf s},
+``` 
+
+```math
+\rho({\bf x}, t)=\int_{\mathbb{R}^3} f({\bf x}, {\bf v},{\bf s}, t) \mathrm{d}{\bf v}\mathrm{d}{\bf s},
+```
+
+``\nabla`` here represents the gradient about ``{\bf x}``.
 
 
-Denote $\mathcal{M}$ the infinite dimensional manifold $\left\{(f, {\bf E},{\bf B})|\, \nabla\cdot{\bf B}=0\right\}$. Spin Vlasov-Maxwell system can be expressed with the Poisson bracket[^1] in the purpose of   using the idea of geometric numerical integration[^3]. For  two functionals $\mathcal{F}$ and $\mathcal{G}$ defined on ${\mathcal M}$,  we introduce  the  Poisson
+Denote ``\mathcal{M}`` the infinite dimensional manifold ``\left\{(f, {\bf E},{\bf B})|\, \nabla\cdot{\bf B}=0\right\}``. Spin Vlasov-Maxwell system can be expressed with the Poisson bracket [^1] in the purpose of   using the idea of geometric numerical integration[^3]. For  two functionals ``\mathcal{F}`` and ``\mathcal{G}`` defined on ``{\mathcal M}``,  we introduce  the  Poisson
 bracket presented in [^1].
 
 ```math
@@ -43,8 +62,8 @@ bracket presented in [^1].
 ```
 
 
-Here, $\left[\cdot,\cdot\right] _{\mathbf{xv}}$
-denotes the Lie bracket for  two functions of $\left({\bf x},{\bf v}\right)$.
+Here, ``\left[\cdot,\cdot\right] _{\mathbf{xv}}``
+denotes the Lie bracket for  two functions of ``\left({\bf x},{\bf v}\right)``.
 It has been proved in [^1] that the bracket(\ref{eq:MMWB}) is Poisson. With  the  Hamiltonian functional defined  by
 
 ```math
@@ -63,7 +82,7 @@ the spin Vlasov-Maxwell system of equations (\ref{eq:Vlasovn}-\ref{eq:MaxwellBn}
 \end{equation}
 ```
 
-where $\mathcal{Z}\in \mathcal{M}$.
+where ``\mathcal{Z}\in \mathcal{M}``.
 
 ## Hamiltonian splitting method
 
@@ -83,7 +102,7 @@ Hamiltonian is split into 8 parts as follows,
 \end{align}
 ```
 
-The subsystem corresponding to $H_{s1}$ is as follows.
+The subsystem corresponding to ``H_{s1}`` is as follows.
 
 ```math
 \begin{align}
@@ -93,7 +112,7 @@ The subsystem corresponding to $H_{s1}$ is as follows.
 \end{align}
 ```
 
-where ${\bf a} = (s_1, 0 , 0)^{T}$.
+where ``{\bf a} = (s_1, 0 , 0)^{T}``.
 
 ## Reduced spin Vlasov-Maxwell equations
 
@@ -114,10 +133,10 @@ The reduced spin Vlasov--Maxwell system is
 \end{equation}
 ```
 
-Particle distribution function is  $f(x, p, {\mathbf s}, t)$, $x, p $ are scalars, ${\mathbf s} \in \mathbb{R}^3$, ${\mathbf E} = (E_x, {\mathbf E}_\perp) = (E_x, E_y, E_z)$, and ${\mathbf A} = (A_x, {\mathbf A}_\perp) = (0, A_y, A_z)$.
+Particle distribution function is  ``f(x, p, {\mathbf s}, t)``, ``x, p `` are scalars, ``{\mathbf s} \in \mathbb{R}^3``, ``{\mathbf E} = (E_x, {\mathbf E}_\perp) = (E_x, E_y, E_z)``, and ``{\mathbf A} = (A_x, {\mathbf A}_\perp) = (0, A_y, A_z)``.
 
 This reduced spin Vlasov-Maxwell system can be expressed with one Poisson 
-bracket as follows. For any two functionals $\mathcal{F}$, and $\mathcal{G}$ depend on $f, {\mathbf E}$, and ${\mathbf A}_\perp$, we have
+bracket as follows. For any two functionals ``\mathcal{F}``, and ``\mathcal{G}`` depend on ``f, {\mathbf E}``, and ``{\mathbf A}_\perp``, we have
 
 ```math
 \begin{equation}
@@ -142,30 +161,21 @@ With the Hamiltonian functional defined by
 \end{equation} 
 ```
 
-the reduced spin Vlasov-Maxwell system of equations (\ref{eq:reduced}) is equivalent to $$\frac{\partial \mathcal{Z}}{\partial t} = \{ \mathcal{Z}, \mathcal{H} \}.$$
+the reduced spin Vlasov-Maxwell system of equations (\ref{eq:reduced}) is equivalent to ````\frac{\partial \mathcal{Z}}{\partial t} = \{ \mathcal{Z}, \mathcal{H} \}.````
 
 ## GEMPIC framework applied to reduced spin Vlasov system.
 
-We consider the components of the electromagnetic fields separately and we have that $E_x$ is a 1-form, $E_y, E_z, A_y, A_z$ are 0-forms. There is a commuting diagram for involved function spaces in one spatial dimension with continuous spaces in the upper line and discrete subspaces in the lower line. The connection between the two sequences is made by the projectors $\Pi_0$ and $\Pi_1$.
-
-```math
-\begin{xy}
- \xymatrix{
-    H^{m+1} \ar[rr]^{\frac{\mathrm{d}}{\mathrm{d} x}}\ar[d]_{\Pi_0} & & H^m \ar[d]^{\Pi_1} \\
-      V_0  \ar[rr]^{\frac{\mathrm{d}}{\mathrm{d} x}} && V_1
-    }
-\end{xy}
-```
+We consider the components of the electromagnetic fields separately and we have that ``E_x`` is a 1-form, ``E_y, E_z, A_y, A_z`` are 0-forms. There is a commuting diagram for involved function spaces in one spatial dimension with continuous spaces in the upper line and discrete subspaces in the lower line. The connection between the two sequences is made by the projectors ``\Pi_0`` and ``\Pi_1``.
 
 ![](xymatrix.png)
 
-The basis for each of the finite dimensional spaces $V_0, V_1$, with dim $V_k = N_k$ is denoted by $\{ \Lambda^0_I\}_{I=1,\cdots,N_0} $, and $\{ \Lambda^1_I\}_{I=1,\cdots,N_1} $. The dual bases of $V_0$ and $V_1$ are $\{\Sigma^0_I\}_{I=1,\cdots, N_0} $, and $\{\Sigma^1_I\}_{I=1,\cdots, N_1} $ respectively, i.e.,  $\int_{\Omega_x} \Sigma^k_I \Lambda^k_J \mathrm{d}x = \delta_{IJ}, k = 0, 1$. $\frac{\mathrm{d}}{\mathrm{d} x}$ is a linear operator, i.e., 
+The basis for each of the finite dimensional spaces ``V_0, V_1``, with dim ``V_k = N_k`` is denoted by ``\{ \Lambda^0_I\}_{I=1,\cdots,N_0} ``, and ``\{ \Lambda^1_I\}_{I=1,\cdots,N_1} ``. The dual bases of ``V_0`` and ``V_1`` are ``\{\Sigma^0_I\}_{I=1,\cdots, N_0} ``, and ``\{\Sigma^1_I\}_{I=1,\cdots, N_1} `` respectively, i.e.,  ``\int_{\Omega_x} \Sigma^k_I \Lambda^k_J \mathrm{d}x = \delta_{IJ}, k = 0, 1``. ``\frac{\mathrm{d}}{\mathrm{d} x}`` is a linear operator, i.e., 
 
 ```math
 \frac{\mathrm{d}}{\mathrm{d} x}: V_0 \rightarrow V_1.
 ```
 
-Operator $\frac{\mathrm{d}}{\mathrm{d} x}$ can be expressed by a matrix $\mathbb{C}$:
+Operator ``\frac{\mathrm{d}}{\mathrm{d} x}`` can be expressed by a matrix ``\mathbb{C}``:
 
 ```math
 \frac{\mathrm{d}}{\mathrm{d} x} \left(\Lambda^0_1, \cdots, \Lambda^0_{N_0} \right)  = \left(\Lambda^1_1, \cdots, \Lambda^1_{N_1} \right) \mathbb{C}_{N_1 N_0}.
@@ -173,13 +183,13 @@ Operator $\frac{\mathrm{d}}{\mathrm{d} x}$ can be expressed by a matrix $\mathbb
 
 ### B-splines
 
-Assume $\Omega_x = [0, L]$, and there is one equidistant grid on $\Omega_x$,
+Assume ``\Omega_x = [0, L]``, and there is one equidistant grid on ``\Omega_x``,
 
 ```math
 x_j = (j-1)\Delta x, \Delta x = L/M, j = 1, \cdots, M.
 ```
 
-We can choose the following $\{\Lambda^0_I\}_{I=1,\cdots,N_0}$, and $\{\Lambda^1_I\}_{I=1,\cdots, N_1}$ as the basis functions for $V_0$, and $V_1$ respectively.
+We can choose the following ``\{\Lambda^0_I\}_{I=1,\cdots,N_0}``, and ``\{\Lambda^1_I\}_{I=1,\cdots, N_1}`` as the basis functions for ``V_0``, and ``V_1`` respectively.
 
 ```math
 \begin{align}
@@ -206,7 +216,7 @@ We can choose the following $\{\Lambda^0_I\}_{I=1,\cdots,N_0}$, and $\{\Lambda^1
 \end{align}
 ```
 
-There is one relation between $\Lambda^k, k = 0, 1$,
+There is one relation between ``\Lambda^k, k = 0, 1``,
 
 ```math
 \frac{\mathrm{d}}{\mathrm{d}x} N^3_j(x) = \frac{1}{\Delta x}\left(N^2_j(x) - N^2_{j+1}(x)  \right),
@@ -295,7 +305,7 @@ Before deriving the discretization of functional derivatives, we introduce sever
 
 ### Discretization of the functional derivatives
 
-As $E_{x, h} = \sum_{I=1}^{N_1}e_{x,I}\Lambda_{I}^1(x)$, any functional $\mathcal{F}[E_{x,h}]$ can be considered as a function $F({\mathbf e}_x)$ of the finite element coefficients, 
+As ``E_{x, h} = \sum_{I=1}^{N_1}e_{x,I}\Lambda_{I}^1(x)``, any functional ``\mathcal{F}[E_{x,h}]`` can be considered as a function ``F({\mathbf e}_x)`` of the finite element coefficients, 
 
 ```math
 \mathcal{F}[E_{x,h}] = F({\mathbf{e}}_x).
@@ -321,13 +331,13 @@ Similarly, we have
 \end{equation}
 ```
 
-We assume a particle-like distribution function for $N_p$ particles labelled by  a, 
+We assume a particle-like distribution function for ``N_p`` particles labelled by  a, 
 
 ```math
 f_h(x,p,{\mathbf s}, t) = \sum_{a=1}^{N_p}\omega_a \delta(x-x_a(t))\delta(p-p_a(t))\delta({\mathbf s}-{\mathbf s}_a(t)).
 ```
 
-One functional of the distribution function, $\mathcal{F}[f]$ can be considered as a function of the particle phase space trajectories, $F({\mathbf{X}}, {\mathbf{P}}, {\mathbf{S}})$.
+One functional of the distribution function, ``\mathcal{F}[f]`` can be considered as a function of the particle phase space trajectories, ``F({\mathbf{X}}, {\mathbf{P}}, {\mathbf{S}})``.
 From [^2], we know that 
 
 ```math
@@ -344,8 +354,8 @@ Substituting the variational derivatives in last subsection into (\ref{eq:poisso
 \end{equation}
 ```
 
-where ${\mathbf u} = ({\mathbf X}, {\mathbf P}, {\mathbf S}, {\mathbf e}_x, {\mathbf e}_y, {\mathbf e}_z, {\mathbf a}_y, {\mathbf a}_z)^{\mathrm{T}}$.
-The matrix $\mathbb{J}$ is
+where ``{\mathbf u} = ({\mathbf X}, {\mathbf P}, {\mathbf S}, {\mathbf e}_x, {\mathbf e}_y, {\mathbf e}_z, {\mathbf a}_y, {\mathbf a}_z)^{\mathrm{T}}``.
+The matrix ``\mathbb{J}`` is
 
 ```math
 \begin{align}\label{eq:dispoisson}
@@ -377,21 +387,21 @@ From the definition of Poisson bracket, we only need to verify the following ide
 \end{equation}
 ```
 
-As the Poisson matrix $\mathbb{J}$ depends only on ${\mathbf X}$, we only need to sum $l$ over $1 \le l \le N_p$.
-It is easy to check that we only need to consider the cases that two of $i,j,k \in \mathbb{Z}$ lie in $[N_p+1, 2N_p]$, and the other one lies in $[5N_p+1,  5N_p+N_1]$. We take the case that  $N_p+1 \le i,j \le 2N_p$ and $5N_p+1 \le k \le 5N_p+N_1$ for example. In this case, Eq.(\ref{eq:jacobi}) becomes 
+As the Poisson matrix ``\mathbb{J}`` depends only on ``{\mathbf X}``, we only need to sum ``l`` over ``1 \le l \le N_p``.
+It is easy to check that we only need to consider the cases that two of ``i,j,k \in \mathbb{Z}`` lie in ``[N_p+1, 2N_p]``, and the other one lies in ``[5N_p+1,  5N_p+N_1]``. We take the case that  ``N_p+1 \le i,j \le 2N_p`` and ``5N_p+1 \le k \le 5N_p+N_1`` for example. In this case, Eq.(\ref{eq:jacobi}) becomes 
 
 ```math
 \sum_{l=1}^{N_p}\left(  \frac{\partial \mathbb{J}_{jk}({\mathbf u})}{\partial u_{l}}\mathbb{J}_{li} +  \frac{\partial \mathbb{J}_{ki}({\mathbf u})}{\partial u_{l}}\mathbb{J}_{lj}\right) = 0.
 ```
 
-As $ \mathbb{J}_{jk}$ in the above depends only on $x_{j-N_p}$, $ \mathbb{J}_{ki}$ depends only on $x_{i-N_p}$, the left hand side of the above identity becomes 
+As `` \mathbb{J}_{jk}`` in the above depends only on ``x_{j-N_p}``, `` \mathbb{J}_{ki}`` depends only on ``x_{i-N_p}``, the left hand side of the above identity becomes 
 
 ```math
 \begin{equation}\label{eq:final}
  \frac{\partial \mathbb{J}_{jk}({\mathbf u})}{\partial u_{j-N_p}}\mathbb{J}_{(j-N_p)i} +  \frac{\partial \mathbb{J}_{ki}({\mathbf u})}{\partial u_{i-N_p}}\mathbb{J}_{(i-N_p)j}.
 \end{equation}
 ```
-When $i\neq j$, $\mathbb{J}_{(j-N_p)i}  = 0$, and $\mathbb{J}_{(i-N_p)j} = 0$, then Eq.(\ref{eq:final}) is zero. When $i = j$, we have $\mathbb{J}_{(j-N_p)i}  =  \mathbb{J}_{(i-N_p)j}  $, and $ \frac{\partial \mathbb{J}_{jk}({\mathbf u})}{\partial u_{j-N_p}} = -\frac{\partial \mathbb{J}_{ki}({\mathbf u})}{\partial u_{i-N_p}}$, then Eq.(\ref{eq:final}) is also zero. Then the proof is finished.
+When ``i\neq j``, ``\mathbb{J}_{(j-N_p)i}  = 0``, and ``\mathbb{J}_{(i-N_p)j} = 0``, then Eq.(\ref{eq:final}) is zero. When ``i = j``, we have ``\mathbb{J}_{(j-N_p)i}  =  \mathbb{J}_{(i-N_p)j}  ``, and `` \frac{\partial \mathbb{J}_{jk}({\mathbf u})}{\partial u_{j-N_p}} = -\frac{\partial \mathbb{J}_{ki}({\mathbf u})}{\partial u_{i-N_p}}``, then Eq.(\ref{eq:final}) is also zero. Then the proof is finished.
 
 Discrete Hamiltonian is 
 
@@ -421,7 +431,7 @@ H&= \frac{1}{2}{\mathbf P}^{\mathrm{T}}\mathbb{M}_p{\mathbf P} + \frac{1}{2}\sum
 
 ### Hamiltonian splitting methods
 
-#### 1. The subsystem corresponding to $H_p = \frac{1}{2}{\mathbf P}^{\mathrm{T}}\mathbb{M}_p{\mathbf P}$ is 
+#### 1. The subsystem corresponding to ``H_p = \frac{1}{2}{\mathbf P}^{\mathrm{T}}\mathbb{M}_p{\mathbf P}`` is 
 
 ```math
 \begin{equation}
@@ -438,7 +448,7 @@ H&= \frac{1}{2}{\mathbf P}^{\mathrm{T}}\mathbb{M}_p{\mathbf P} + \frac{1}{2}\sum
 \end{equation}
 ```
 
-For this subsystem, we only need to compute $ {\mathbf X}, {\mathbf{e}}_x$.
+For this subsystem, we only need to compute `` {\mathbf X}, {\mathbf{e}}_x``.
 
 ```math
 \begin{equation}
@@ -449,7 +459,7 @@ For this subsystem, we only need to compute $ {\mathbf X}, {\mathbf{e}}_x$.
 \end{equation}
 ```
 
-#### 2. The subsystem corresponding to $H_A$ is
+#### 2. The subsystem corresponding to ``H_A`` is
 
 ```math
 H_A = \frac{1}{2}\sum_{a=1}^{N_p}\omega_a{\mathbf a_y}^{\mathrm{T}}\mathbb{N}^0(x_a){\mathbf a}_y + \sum_{a=1}^{N_p}\omega_a{\mathbf a_z}^{\mathrm{T}}\mathbb{N}^0(x_a){\mathbf a}_z + \frac{1}{2}{\mathbf a_y}^{\mathrm{T}}\mathbb{C}^{\mathrm{T}}{\mathbb{M}}_1\mathbb{C}{\mathbf a}_y
@@ -471,7 +481,7 @@ H_A = \frac{1}{2}\sum_{a=1}^{N_p}\omega_a{\mathbf a_y}^{\mathrm{T}}\mathbb{N}^0(
 \end{equation}
 ```
 
-In this subsystem, ${\mathbf X}, {\mathbf S}, {\mathbf e}_x, {\mathbf a}_y, {\mathbf a}_z$ stay unchanged along the time. As for ${\mathbf P}$, we have 
+In this subsystem, ``{\mathbf X}, {\mathbf S}, {\mathbf e}_x, {\mathbf a}_y, {\mathbf a}_z`` stay unchanged along the time. As for ``{\mathbf P}``, we have 
 
 
 ```math
@@ -538,7 +548,7 @@ is
 \end{equation}
 ```
 
-For this subsystem, we firstly solve $\dot{\mathbf S} = \mathbb{S}\frac{\partial H_{s}}{\partial {\mathbf S}}$. For each particle, we have
+For this subsystem, we firstly solve ``\dot{\mathbf S} = \mathbb{S}\frac{\partial H_{s}}{\partial {\mathbf S}}``. For each particle, we have
 
 ```math
 \begin{align}
@@ -569,8 +579,8 @@ For this subsystem, we firstly solve $\dot{\mathbf S} = \mathbb{S}\frac{\partial
 \end{align}
 ```
 
-where $Y = {\mathbf a}_y^{\mathrm{T}}\mathbb{C}^{\mathrm{T}}R^1(x_a)$, $Z = {\mathbf a}_z^{\mathrm{T}}\mathbb{C}^{\mathrm{T}}R^1(x_a)$, $R^1(x_a) = (\Lambda^1_1(x_a), \cdots, \Lambda^1_{N_1}(x_a))^{\mathrm{T}}$.
-Set a vector ${\mathbf v}  = (0, Z, -Y) \in \mathbb{R}^3$. Then 
+where ``Y = {\mathbf a}_y^{\mathrm{T}}\mathbb{C}^{\mathrm{T}}R^1(x_a)``, ``Z = {\mathbf a}_z^{\mathrm{T}}\mathbb{C}^{\mathrm{T}}R^1(x_a)``, ``R^1(x_a) = (\Lambda^1_1(x_a), \cdots, \Lambda^1_{N_1}(x_a))^{\mathrm{T}}``.
+Set a vector ``{\mathbf v}  = (0, Z, -Y) \in \mathbb{R}^3``. Then 
 
 ```math
 {\mathbf s}_a(t) = \exp(t\hat{v}){\mathbf s}_a(0) = \left(I + \frac{\sin(t|{\mathbf v}|)}{|\mathbf {v}|}\hat{v} + \frac{1}{2}\left( \frac{\sin(\frac{t}{2}|{\mathbf v}|)}{\frac{|{\mathbf v}|}{2}} \right)^2 \hat{v}^2\right) {\mathbf s}_a(0),
@@ -629,7 +639,7 @@ is,
 \end{equation}
 ```
 
-We only need to solve the equation about ${\mathbf P}$,
+We only need to solve the equation about ``{\mathbf P}``,
 
 ```math
 \begin{equation}
@@ -637,8 +647,7 @@ We only need to solve the equation about ${\mathbf P}$,
 \end{equation}
 ```
 
-
-Vlasov--Maxwell equations for laser-plasma interaction[^6].
+and Vlasov--Maxwell equations for laser-plasma interaction[^6].
 
 
 # References

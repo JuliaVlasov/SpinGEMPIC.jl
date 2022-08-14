@@ -15,6 +15,9 @@ import GEMPIC: OneDGrid, Maxwell1DFEM
 import GEMPIC: eval_uniform_periodic_spline_curve
 import GEMPIC: l2projection!
 
+"""
+Test corresponding to Fig. 4 of the JPP paper 
+"""
 function run_simulation( steps, Δt)
 
     σ, μ = 0.17, 0.0
@@ -149,12 +152,12 @@ end
 steps, Δt = 100, 0.05
 
 thdiag = run_simulation(steps, Δt)
+ref = CSV.read("frame.csv", DataFrame)
 
 time = thdiag.data[!, :Time]
 kenergy = thdiag.data[!, :KineticEnergy]
 plot( time, kenergy, xlabel = "time", ylabel = "kinetic energy", label = "new")
 
-ref = CSV.read("frame.csv", DataFrame)
 time = ref[!, :Time]
 kenergy = ref[!, :KineticEnergy]
 plot!( time, kenergy, xlabel = "time", ylabel = "kinetic energy", label = "old")

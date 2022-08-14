@@ -3,7 +3,17 @@ using SpinGEMPIC
 
 makedocs(
     sitename = "SpinGEMPIC",
-    format = Documenter.HTML(),
+    format = Documenter.HTML(;
+    prettyurls=get(ENV, "CI", nothing) == "true",
+    mathengine = MathJax3(Dict(
+    :loader => Dict("load" => ["[tex]/physics"]),
+    :tex => Dict(
+        "inlineMath" => [["\$","\$"], ["\\(","\\)"]],
+        "tags" => "ams",
+        "packages" => ["base", "ams", "autoload", "physics"],
+    ),
+)),
+                            ),
     modules = [SpinGEMPIC],
     pages = ["Documentation" => ["index.md",
                                  "mesh.md",

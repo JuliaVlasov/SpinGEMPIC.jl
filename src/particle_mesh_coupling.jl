@@ -3,6 +3,7 @@ using FastGaussQuadrature
 import GEMPIC: SplinePP
 import GEMPIC: uniform_bsplines_eval_basis
 import GEMPIC: horner_1d
+import GEMPIC: AbstractParticleMeshCoupling
 
 export ParticleMeshCoupling
 
@@ -28,10 +29,10 @@ Spline with index i starts at point i
 
 !!! note
 
-    Only 1D version is implemented for now
+    This version for Spin problem is very close to functions implemented in [GEMPIC.jl](https://github.com/juliavlasov/GEMPIC.jl)
 
 """
-mutable struct ParticleMeshCoupling
+mutable struct ParticleMeshCoupling <: AbstractParticleMeshCoupling
 
     dims::Int
     domain::Vector{Float64}
@@ -128,7 +129,7 @@ function add_charge!(
 
     p.spline_val .= uniform_bsplines_eval_basis(p.spline_degree, xi)
 
-    for i = 1:p.n_span
+    @inbounds for i = 1:p.n_span
         index1d = mod(index + i - 2, p.n_grid[1]) + 1
         rho_dofs[index1d] += marker_charge * p.spline_val[i] * p.scaling
     end
@@ -152,8 +153,8 @@ particle contributes to, and `r_old`, its position (normalized to cell size one)
 function add_current_update_v!(
     j_dofs::AbstractArray,
     p::ParticleMeshCoupling,
-    position_old::Vector{Float64},
-    position_new::Vector{Float64},
+    position_old::Float64,
+    position_new::Float64,
     marker_charge::Float64,
     qoverm::Float64,
     vi::Float64,
@@ -253,7 +254,7 @@ function update_jv!(
     p.spline_val .*= p.quad_w[1] * c1
 
 
-    for j = 2:p.n_quad_points
+    @inbounds for j = 2:p.n_quad_points
 
         p.spline_val_more .=
             uniform_bsplines_eval_basis(p.spline_degree, c1 * p.quad_x[j] + c2)
@@ -265,7 +266,7 @@ function update_jv!(
     p.spline_val .*= sign * p.delta_x[1]
 
     ind = 1
-    for i_grid = index-p.spline_degree:index
+    @inbounds for i_grid = index-p.spline_degree:index
         i_mod = mod(i_grid, n_cells) + 1
         j_dofs[i_mod] += marker_charge * p.spline_val[ind] * p.scaling
         vi = vi
@@ -295,7 +296,7 @@ function evaluate(p::ParticleMeshCoupling, position::Float64, field_dofs::Vector
     p.spline_val .= uniform_bsplines_eval_basis(p.spline_degree, xi)
 
     field_value = 0.0
-    for i = 1:p.n_span
+    @inbounds for i = 1:p.n_span
         index1d = mod(index + i - 2, p.n_grid[1]) + 1
         field_value += field_dofs[index1d] * p.spline_val[i]
     end
