@@ -19,6 +19,20 @@ import SpinGEMPIC: operatorHs
 import GEMPIC: OneDGrid, Maxwell1DFEM
 import GEMPIC: l2projection!
 
+using HDF5
+import Printf 
+
+function save_spin(istep, pg)
+
+    filename = Printf.@sprintf("spin-%05", istep)
+    h5open(filename * ".h5", "w") do file
+        write(file, "s1", pg.array[3,:])  
+        write(file, "s2", pg.array[4,:]) 
+        write(file, "s3", pg.array[5,:])
+    end
+
+end
+
 """
 Test corresponding to Fig. 4 of the JPP paper 
 """
@@ -103,7 +117,7 @@ function run_simulation( steps, Δt)
 
 end
 
-steps, Δt = 1000, 0.05
+steps, Δt = 6000, 0.05
 
 thdiag = run_simulation(steps, Δt)
 
