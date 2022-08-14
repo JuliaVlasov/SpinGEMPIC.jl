@@ -71,7 +71,7 @@ function sample!(rng, pg, ps :: ParticleSampler, df::AbstractCosGaussian, mesh)
 
     for i_part = 1:(pg.n_particles)
 
-        x .= mesh.xmin .+ Sobol.next!(rng_sobol) .* mesh.Lx
+        x .= mesh.xmin .+ Sobol.next!(rng_sobol) .* mesh.dimx
 
         # Sampling in v
         v .= rand!(rng, d, v)
@@ -98,7 +98,7 @@ function sample!(rng, pg, ps :: ParticleSampler, df::AbstractCosGaussian, mesh)
         w = 1 / (4 * pi) * (1 + 0.5 * s[3]) .* 4 * pi
 
         # Set weight according to value of perturbation
-        w = w * eval_x_density(df, x) .* prod(mesh.Lx)
+        w = w * eval_x_density(df, x) .* prod(mesh.dimx)
 
         # Copy the generated numbers to the particle
         set_x(pg, i_part, x)

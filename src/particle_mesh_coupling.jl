@@ -1,6 +1,6 @@
 using FastGaussQuadrature
 
-import GEMPIC: SplinePP
+import GEMPIC: SplinePP, OneDGrid
 import GEMPIC: uniform_bsplines_eval_basis
 import GEMPIC: uniform_bsplines_eval_basis!
 import GEMPIC: horner_1d
@@ -52,12 +52,13 @@ mutable struct ParticleMeshCoupling <: AbstractParticleMeshCoupling
     spline_pp::SplinePP
 
     function ParticleMeshCoupling(
-        domain::AbstractArray,
-        n_grid::Vector{Int64},
+        mesh::OneDGrid,
         no_particles::Int,
         spline_degree::Int,
         smoothing_type::Symbol,
     )
+        domain = [mesh.xmin, mesh.xmax, mesh.dimx]
+        n_grid = [mesh.nx]
         dims = 1
         n_dofs = prod(n_grid)
         delta_x = (domain[2] - domain[1]) / n_grid[1]
@@ -162,13 +163,13 @@ function add_current_update_v!(
 )
 
 
-    xi = (position_old[1] - p.domain[1]) / p.delta_x[1]
+    xi = (position_old - p.domain[1]) / p.delta_x
     index_old = floor(Int64, xi)
     r_old = xi - index_old
 
     # Compute the new box index index_new and normalized position r_old.
 
-    xi = (position_new[1] - p.domain[1]) / p.delta_x[1]
+    xi = (position_new - p.domain[1]) / p.delta_x
     index_new = floor(Int64, xi)
     r_new = xi - index_new
 
@@ -262,7 +263,7 @@ function update_jv!(
 
     end
 
-    p.spline_val .*= sign * p.delta_x[1]
+    p.spline_val .*= sign * p.delta_x
 
     ind = 1
     @inbounds for i_grid = index-p.spline_degree:index
@@ -287,7 +288,7 @@ Evaluate field at `position`
 """
 function evaluate(p::ParticleMeshCoupling, position::Float64, field_dofs::Vector{Float64})
 
-    xi = (position[1] - p.domain[1]) / p.delta_x[1]
+    xi = (position[1] - p.domain[1]) / p.delta_x
     index = floor(Int64, xi) + 1
     xi = xi - (index - 1)
     index = index - p.spline_degree

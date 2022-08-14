@@ -1,7 +1,6 @@
 module SpinGEMPIC
 
 # Utilities
-include("mesh.jl")
 include("distributions.jl")
 
 # Particle Group
