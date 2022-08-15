@@ -19,15 +19,16 @@ import SpinGEMPIC: operatorHs
 import GEMPIC: OneDGrid, Maxwell1DFEM
 import GEMPIC: l2projection!
 
-using HDF5
+import HDF5
+import Printf
 
 function save_spin(istep, pg)
 
     filename = Printf.@sprintf("spin-%05i", istep)
-    h5open(filename * ".h5", "w") do file
-        write(file, "s1", pg.array[3,:])  
-        write(file, "s2", pg.array[4,:]) 
-        write(file, "s3", pg.array[5,:])
+    HDF5.h5open(filename * ".h5", "w") do file
+        HDF5.write(file, "s1", pg.array[3,:])  
+        HDF5.write(file, "s2", pg.array[4,:]) 
+        HDF5.write(file, "s3", pg.array[5,:])
     end
 
 end
@@ -99,8 +100,11 @@ function run_simulation( steps, Δt)
     
     write_step!(thdiag, 0.0, spline_degree,
                         efield_dofs,  afield_dofs,
-                        efield_dofs_n, efield_poisson, propagator)
+                        efield_dofs_n, efield_poisson, 
+                        propagator, particle_group)
     
+    save_spin(1, particle_group)
+
     @showprogress 1 for j = 1:steps # loop over time
     
         strang_splitting!(propagator, particle_group, Δt, 1)
@@ -109,15 +113,22 @@ function run_simulation( steps, Δt)
                         efield_dofs,  afield_dofs,
                         efield_dofs_n, efield_poisson, 
                         propagator, particle_group)
+
+        if mod(j, 1000) == 0
+            save_spin(j, particle_group)
+        end
+
     end
 
     return thdiag
 
 end
 
-steps, Δt = 1000, 0.05
+steps, Δt = 80000, 0.05
 
 thdiag = run_simulation(steps, Δt)
+
+CSV.write("data_paper.csv",thdiag.data)
 
 ref = CSV.read("frame.csv", DataFrame)
 
