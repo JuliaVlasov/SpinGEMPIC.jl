@@ -73,12 +73,11 @@ end
 export TimeHistoryDiagnostics
 
 """
-    TimeHistoryDiagnostics( particle_group, maxwell_solver, 
+    TimeHistoryDiagnostics( maxwell_solver, 
                             kernel_smoother_0, kernel_smoother_1 )
 
 Context to save and plot diagnostics
 
-- `particle_group` : Particles data
 - `maxwell_solver` : Maxwell solver
 - `kernel_smoother_0` : Mesh coupling operator
 - `kernel_smoother_1` : Mesh coupling operator
@@ -86,14 +85,12 @@ Context to save and plot diagnostics
 """
 mutable struct TimeHistoryDiagnostics
 
-    particle_group::ParticleGroup
     maxwell_solver::Maxwell1DFEM
     kernel_smoother_0::ParticleMeshCoupling
     kernel_smoother_1::ParticleMeshCoupling
     data::DataFrame
 
     function TimeHistoryDiagnostics(
-        particle_group::ParticleGroup,
         maxwell_solver::Maxwell1DFEM,
         kernel_smoother_0::ParticleMeshCoupling,
         kernel_smoother_1::ParticleMeshCoupling,
@@ -124,7 +121,7 @@ mutable struct TimeHistoryDiagnostics
         )
 
 
-        new(particle_group, maxwell_solver, kernel_smoother_0, kernel_smoother_1, data)
+        new(maxwell_solver, kernel_smoother_0, kernel_smoother_1, data)
     end
 end
 
@@ -154,21 +151,22 @@ function write_step!(
     efield_dofs_n,
     efield_poisson,
     propagator,
+    particle_group
 )
 
     diagnostics = zeros(Float64, 12)
     potential_energy = zeros(Float64, 5)
     HH = 0.00022980575
 
-    for i_part = 1:thdiag.particle_group.n_particles
+    for i_part = 1:particle_group.n_particles
         fill!(propagator.j_dofs[1], 0.0)
         fill!(propagator.j_dofs[2], 0.0)
-        xi = get_x(thdiag.particle_group, i_part)
-        vi = get_v(thdiag.particle_group, i_part)
-        s1 = get_s1(thdiag.particle_group, i_part)
-        s2 = get_s2(thdiag.particle_group, i_part)
-        s3 = get_s3(thdiag.particle_group, i_part)
-        wi = get_mass(thdiag.particle_group, i_part)
+        xi = get_x(particle_group, i_part)
+        vi = get_v(particle_group, i_part)
+        s1 = get_s1(particle_group, i_part)
+        s2 = get_s2(particle_group, i_part)
+        s3 = get_s3(particle_group, i_part)
+        wi = get_mass(particle_group, i_part)
 
         # Kinetic energy
         v2 = evaluate(thdiag.kernel_smoother_0, xi[1], afield_dofs[1])
@@ -205,7 +203,7 @@ function write_step!(
     end
 
     transfer = pic_diagnostics_transfer(
-        thdiag.particle_group,
+        particle_group,
         thdiag.kernel_smoother_0,
         thdiag.kernel_smoother_1,
         efield_dofs,

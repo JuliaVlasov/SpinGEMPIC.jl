@@ -78,41 +78,42 @@ function run_simulation( steps, Δt)
                                        kernel_smoother0, 
                                        kernel_smoother1, 
                                        kernel_smoother2,
-                                       particle_group,
                                        efield_dofs,
                                        afield_dofs,
                                        domain);
     
     efield_dofs_n = propagator.e_dofs
     
-    thdiag = TimeHistoryDiagnostics( particle_group, maxwell_solver, 
+    thdiag = TimeHistoryDiagnostics( maxwell_solver, 
                             kernel_smoother0, kernel_smoother1 );
     
     write_step!(thdiag, 0.0, spline_degree,
                         efield_dofs,  afield_dofs,
-                        efield_dofs_n, efield_poisson, propagator)
+                        efield_dofs_n, efield_poisson, 
+                        propagator, particle_group)
     
     @showprogress 1 for j = 1:steps # loop over time
     
-        @timeit to "HE" operatorHE(propagator, 0.5Δt)
-        @timeit to "Hp" operatorHp(propagator, 0.5Δt)
-        @timeit to "HA" operatorHA(propagator, 0.5Δt)
-        @timeit to "Hs" operatorHs(propagator, 1.0Δt)
-        @timeit to "HA" operatorHA(propagator, 0.5Δt)
-        @timeit to "Hp" operatorHp(propagator, 0.5Δt)
-        @timeit to "HE" operatorHE(propagator, 0.5Δt)
+        @timeit to "HE" operatorHE(propagator, particle_group, 0.5Δt)
+        @timeit to "Hp" operatorHp(propagator, particle_group, 0.5Δt)
+        @timeit to "HA" operatorHA(propagator, particle_group, 0.5Δt)
+        @timeit to "Hs" operatorHs(propagator, particle_group, 1.0Δt)
+        @timeit to "HA" operatorHA(propagator, particle_group, 0.5Δt)
+        @timeit to "Hp" operatorHp(propagator, particle_group, 0.5Δt)
+        @timeit to "HE" operatorHE(propagator, particle_group, 0.5Δt)
 
     
         write_step!(thdiag, j * Δt, spline_degree, 
                         efield_dofs,  afield_dofs,
-                        efield_dofs_n, efield_poisson, propagator)
+                        efield_dofs_n, efield_poisson, 
+                        propagator, particle_group)
     end
 
     return thdiag
 
 end
 
-steps, Δt = 200, 0.05
+steps, Δt = 400, 0.05
 
 thdiag = run_simulation(steps, Δt)
 

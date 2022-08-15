@@ -20,11 +20,10 @@ import GEMPIC: OneDGrid, Maxwell1DFEM
 import GEMPIC: l2projection!
 
 using HDF5
-import Printf 
 
 function save_spin(istep, pg)
 
-    filename = Printf.@sprintf("spin-%05", istep)
+    filename = Printf.@sprintf("spin-%05i", istep)
     h5open(filename * ".h5", "w") do file
         write(file, "s1", pg.array[3,:])  
         write(file, "s2", pg.array[4,:]) 
@@ -48,14 +47,13 @@ function run_simulation( steps, Δt)
     mesh = OneDGrid( xmin, xmax, nx)
     spline_degree = 3
     
-    df = CosSumGaussian{1,1,3}([[kx]], [α], [[σ]], [[μ]] )
+    df = CosGaussian(kx, α, σ, μ )
     
     rng = MersenneTwister(123)
     mass, charge = 1.0, 1.0
     
-    particle_group = ParticleGroup{1,1,3}( n_particles, mass, charge, 1)   
-    sampler = ParticleSampler{1,1,3}( n_particles)
-    sample!(rng, particle_group, sampler, df, mesh)
+    particle_group = ParticleGroup( n_particles, mass, charge, 1)   
+    sample!(rng, particle_group, df, mesh)
     set_common_weight(particle_group, (1.0/n_particles))
 
     kernel_smoother2 = ParticleMeshCoupling( mesh, n_particles, spline_degree-2, :galerkin) 
@@ -64,8 +62,8 @@ function run_simulation( steps, Δt)
     
     maxwell_solver = Maxwell1DFEM(mesh, spline_degree)
 
-    rho = zeros(Float64, nx)
-    efield_poisson = zeros(Float64, nx)
+    rho = zeros(nx)
+    efield_poisson = zeros(nx)
     
     solve_poisson!( efield_poisson, particle_group, kernel_smoother0, maxwell_solver, rho )
     
@@ -90,15 +88,14 @@ function run_simulation( steps, Δt)
                                        kernel_smoother0, 
                                        kernel_smoother1, 
                                        kernel_smoother2,
-                                       particle_group,
                                        efield_dofs,
                                        afield_dofs,
                                        domain);
     
     efield_dofs_n = propagator.e_dofs
     
-    thdiag = TimeHistoryDiagnostics( particle_group, maxwell_solver, 
-                            kernel_smoother0, kernel_smoother1 );
+    thdiag = TimeHistoryDiagnostics( maxwell_solver, 
+                            kernel_smoother0, kernel_smoother1 )
     
     write_step!(thdiag, 0.0, spline_degree,
                         efield_dofs,  afield_dofs,
@@ -106,18 +103,19 @@ function run_simulation( steps, Δt)
     
     @showprogress 1 for j = 1:steps # loop over time
     
-        strang_splitting!(propagator, Δt, 1)
+        strang_splitting!(propagator, particle_group, Δt, 1)
     
         write_step!(thdiag, j * Δt, spline_degree, 
                         efield_dofs,  afield_dofs,
-                        efield_dofs_n, efield_poisson, propagator)
+                        efield_dofs_n, efield_poisson, 
+                        propagator, particle_group)
     end
 
     return thdiag
 
 end
 
-steps, Δt = 6000, 0.05
+steps, Δt = 1000, 0.05
 
 thdiag = run_simulation(steps, Δt)
 
