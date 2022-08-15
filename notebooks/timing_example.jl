@@ -43,7 +43,7 @@ function run_simulation( steps, Δt)
     mass, charge = 1.0, 1.0
     
     particle_group = ParticleGroup( n_particles, mass, charge, 1)   
-    sampler = ParticleSampler{1,1,3}( n_particles)
+    sampler = ParticleSampler( n_particles)
     sample!(rng, particle_group, sampler, df, mesh)
     set_common_weight(particle_group, (1.0/n_particles))
 
