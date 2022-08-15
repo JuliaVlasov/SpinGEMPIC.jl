@@ -183,6 +183,7 @@ Set weights of particle @ i
 
 end
 
+export set_common_weight
 """
     set_common_weight( p, x ) 
 

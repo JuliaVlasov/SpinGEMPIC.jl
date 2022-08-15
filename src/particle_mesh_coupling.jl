@@ -56,8 +56,8 @@ mutable struct ParticleMeshCoupling <: AbstractParticleMeshCoupling
     function ParticleMeshCoupling(
         mesh::OneDGrid,
         no_particles::Int,
-        spline_degree::Int,
-        smoothing_type::Symbol,
+        spline_degree::Int;
+        smoothing_type::Symbol = :galerkin
     )
         xmin, xmax, dimx = mesh.xmin, mesh.xmax, mesh.dimx
         nx = mesh.nx
