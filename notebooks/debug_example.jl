@@ -24,21 +24,20 @@ import GEMPIC: l2projection!
 kx, α = 1.22, 0.02
 steps, Δt = 100, 0.05
 
-xmin, xmax = 0, 4*pi/kx
+xmin, xmax = 0, 4pi/kx
 domain = [xmin, xmax, xmax - xmin]
 nx = 128
 n_particles = 20000
 mesh = OneDGrid( xmin, xmax, nx)
 spline_degree = 3
 
-df = CosSumGaussian{1,1,3}([[kx]], [α], [[σ]], [[μ]] )
+df = CosGaussian(kx, α, σ, μ)
 
 rng = MersenneTwister(123)
 mass, charge = 1.0, 1.0
 
-particle_group = ParticleGroup{1,1,3}( n_particles, mass, charge, 1)   
-sampler = ParticleSampler{1,1,3}( n_particles)
-sample!(rng, particle_group, sampler, df, mesh)
+particle_group = ParticleGroup( n_particles, mass, charge, 1)   
+sample!(rng, particle_group, df, mesh)
 set_common_weight(particle_group, (1.0/n_particles))
 
 kernel_smoother2 = ParticleMeshCoupling( mesh, n_particles, spline_degree-2, :galerkin) 
@@ -47,8 +46,8 @@ kernel_smoother0 = ParticleMeshCoupling( mesh, n_particles, spline_degree, :gale
 
 maxwell_solver = Maxwell1DFEM(mesh, spline_degree)
 
-rho = zeros(Float64, nx)
-efield_poisson = zeros(Float64, nx)
+rho = zeros(nx)
+efield_poisson = zeros(nx)
 
 solve_poisson!( efield_poisson, particle_group, kernel_smoother0, maxwell_solver, rho )
 
@@ -87,3 +86,5 @@ operatorHs(propagator, 1.0Δt)
 operatorHA(propagator, 0.5Δt)
 operatorHp(propagator, 0.5Δt)
 operatorHE(propagator, 0.5Δt)
+
+@code_warntype operatorHs(propagator, 1.0Δt)

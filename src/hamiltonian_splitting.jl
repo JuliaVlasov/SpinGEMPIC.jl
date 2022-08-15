@@ -314,42 +314,45 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
     coef = 1 / h.delta_x
     
     spline_degree1 :: Int = h.kernel_smoother_1.spline_degree
-    n_span1 = spline_degree1+1
+    n_span1 :: Int = spline_degree1+1
     spline_val1 = zeros(n_span1)
     spline_degree2 :: Int = h.kernel_smoother_2.spline_degree
-    n_span2 = spline_degree2+1
+    n_span2 :: Int = spline_degree2+1
     spline_val2 = zeros(n_span2)
 
     charge :: Float64 = h.particle_group.charge * h.particle_group.common_weight
 
-    for i_part = 1:h.particle_group.n_particles
+    n_particles :: Int = h.particle_group.n_particles
 
-        v_new = h.particle_group.array[2, i_part]
+    for i_part = 1:n_particles
 
-        # Evaluate efields at particle position
-        xi = h.particle_group.array[1, i_part]
+        xi :: Float64 = h.particle_group.array[1, i_part]
+        v_new :: Float64 = h.particle_group.array[2, i_part]
+
         fill!(h.j_dofs[1], 0.0)
         fill!(h.j_dofs[2], 0.0)
 
-        xn = (xi - h.x_min)  * coef
-        index = trunc(Int, xn)
-        xn = xn - index
-        index = index - spline_degree1
+        xn :: Float64 = (xi - h.x_min)  * coef
+        index :: Int = trunc(Int, xn)
+        xn -= index
+        index1 = index - spline_degree1
 
         uniform_bsplines_eval_basis!(spline_val1, spline_degree1, xn)
 
-        index1d = [mod1(index + i, nx) for i in 1:n_span1]
-        h.j_dofs[2][index1d] .= spline_val1
-
-        # compute rderivatives
-
-        for i in index1d
-            ip1 = mod1(i+1, nx)
-            h.j_dofs[1][i] = coef * (h.j_dofs[2][i] - h.j_dofs[2][ip1])
+        for i = 1:n_span1
+            ip = mod1(index1 + i, nx)
+            h.j_dofs[2][ip] = spline_val1[i]
+        end
+        
+        for i in 1:n_span1
+            ip = mod1(index1+i, nx)
+            ip1 = mod1(index1+i+1, nx)
+            h.j_dofs[1][ip] = coef * (h.j_dofs[2][ip] - h.j_dofs[2][ip1])
         end
 
-        Y = h.a_dofs[1]' * h.j_dofs[1]
-        Z = h.a_dofs[2]' * h.j_dofs[1]
+
+        Y :: Float64 = h.a_dofs[1]' * h.j_dofs[1]
+        Z :: Float64 = h.a_dofs[2]' * h.j_dofs[1]
 
         hat_v[1, 2] = Y
         hat_v[1, 3] = Z
@@ -385,25 +388,27 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
         fill!(h.j_dofs[1], 0.0)
         fill!(h.j_dofs[2], 0.0)
 
-        xn = (xi - h.x_min)  * coef
-        index = trunc(Int, xn)
-        xn = xn - index
-        index = index - spline_degree2
+        index2 = index - spline_degree2
 
         uniform_bsplines_eval_basis!(spline_val2, spline_degree2, xn)
 
-        index1d = [mod1(index + i, nx) for i in 1:n_span2]
-        h.j_dofs[2][index1d] .= spline_val2
+        for i = 1:n_span2
+            ip = mod1(index2 + i, nx)
+            h.j_dofs[2][ip] = spline_val2[i]
+        end
+
 
         # compute rderivatives
 
-        for i in index1d
-            ip1 = mod1(i+1, nx)
-            h.j_dofs[1][i] = coef * (h.j_dofs[2][i] - h.j_dofs[2][ip1])
+        for i = 1:n_span2
+            ip = mod1(index2 + i, nx)
+            ip1 = mod1(ip+1, nx)
+            h.j_dofs[1][ip] = coef * (h.j_dofs[2][ip] - h.j_dofs[2][ip1])
         end
-        for i in index1d
-            ip1 = mod1(i+1, nx)
-            h.j_dofs[2][i] = coef * (h.j_dofs[1][i] - h.j_dofs[1][ip1])
+        for i in 1:n_span2
+            ip = mod1(index2 + i, nx)
+            ip1 = mod1(ip+1, nx)
+            h.j_dofs[2][ip] = coef * (h.j_dofs[1][ip] - h.j_dofs[1][ip1])
         end
 
         vi = v_new - HH * h.a_dofs[2]' * h.j_dofs[2] * St[2] +
@@ -425,5 +430,6 @@ function operatorHs(h::HamiltonianSplitting, dt::Float64)
 
     compute_e_from_j!(h.e_dofs[2], h.maxwell_solver, h.j_dofs[1], 2)
     compute_e_from_j!(h.e_dofs[3], h.maxwell_solver, h.j_dofs[2], 2)
+
 
 end
