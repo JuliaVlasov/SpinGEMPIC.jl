@@ -1,10 +1,13 @@
+# Example
+
+Test corresponding to Fig. 4 of the paper 
+
+```@example paper
 using DataFrames
 using CSV
 using Plots
-using ProgressMeter
 using Random
 using SpinGEMPIC
-using TimerOutputs
 
 import SpinGEMPIC: set_common_weight
 import SpinGEMPIC: get_s1, get_s2, get_s3
@@ -20,17 +23,12 @@ import SpinGEMPIC: operatorHs
 import GEMPIC: OneDGrid, Maxwell1DFEM
 import GEMPIC: l2projection!
 
-const to = TimerOutput()
-
-"""
-Test corresponding to Fig. 4 of the JPP paper 
-"""
 function run_simulation( steps, Δt)
 
     σ, μ = 0.17, 0.0
     kx, α = 1.22, 0.02
     
-    xmin, xmax = 0, 4*pi/kx
+    xmin, xmax = 0, 4pi/kx
     domain = [xmin, xmax, xmax - xmin]
     nx = 128
     n_particles = 20000
@@ -52,8 +50,8 @@ function run_simulation( steps, Δt)
     
     maxwell_solver = Maxwell1DFEM(mesh, spline_degree)
 
-    rho = zeros(Float64, nx)
-    efield_poisson = zeros(Float64, nx)
+    rho = zeros(nx)
+    efield_poisson = zeros(nx)
     
     solve_poisson!( efield_poisson, particle_group, kernel_smoother0, maxwell_solver, rho )
     
@@ -85,47 +83,34 @@ function run_simulation( steps, Δt)
     efield_dofs_n = propagator.e_dofs
     
     thdiag = TimeHistoryDiagnostics( maxwell_solver, 
-                            kernel_smoother0, kernel_smoother1 );
+                            kernel_smoother0, kernel_smoother1 )
     
     write_step!(thdiag, 0.0, spline_degree,
                         efield_dofs,  afield_dofs,
                         efield_dofs_n, efield_poisson, 
                         propagator, particle_group)
     
-    @showprogress 1 for j = 1:steps # loop over time
+    for j = 1:steps # loop over time
     
-        @timeit to "HE" operatorHE(propagator, particle_group, 0.5Δt)
-        @timeit to "Hp" operatorHp(propagator, particle_group, 0.5Δt)
-        @timeit to "HA" operatorHA(propagator, particle_group, 0.5Δt)
-        @timeit to "Hs" operatorHs(propagator, particle_group, 1.0Δt)
-        @timeit to "HA" operatorHA(propagator, particle_group, 0.5Δt)
-        @timeit to "Hp" operatorHp(propagator, particle_group, 0.5Δt)
-        @timeit to "HE" operatorHE(propagator, particle_group, 0.5Δt)
-
+        strang_splitting!(propagator, particle_group, Δt, 1)
     
         write_step!(thdiag, j * Δt, spline_degree, 
                         efield_dofs,  afield_dofs,
                         efield_dofs_n, efield_poisson, 
                         propagator, particle_group)
+
     end
 
     return thdiag
 
 end
 
-steps, Δt = 1000, 0.05
+steps, Δt = 100, 0.05
 
 thdiag = run_simulation(steps, Δt)
-
-show(to)
-
-ref = CSV.read("frame.csv", DataFrame)
 
 time = thdiag.data[!, :Time]
 kenergy = thdiag.data[!, :KineticEnergy]
 plot( time, kenergy, xlabel = "time", ylabel = "kinetic energy", label = "new")
-
-time = ref[!, :Time]
-kenergy = ref[!, :KineticEnergy]
-plot!( time, kenergy, xlabel = "time", ylabel = "kinetic energy", label = "old")
+```
 
