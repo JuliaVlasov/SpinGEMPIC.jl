@@ -1,10 +1,5 @@
-using DataFrames
-using CSV
-using Plots
-using ProgressMeter
 using Random
 using SpinGEMPIC
-using TimerOutputs
 
 import SpinGEMPIC: set_common_weight
 import SpinGEMPIC: get_s1, get_s2, get_s3
@@ -85,5 +80,3 @@ operatorHs(propagator, particle_group, 1.0Δt)
 operatorHA(propagator, particle_group, 0.5Δt)
 operatorHp(propagator, particle_group, 0.5Δt)
 operatorHE(propagator, particle_group, 0.5Δt)
-
-@code_warntype operatorHs(propagator, 1.0Δt)
