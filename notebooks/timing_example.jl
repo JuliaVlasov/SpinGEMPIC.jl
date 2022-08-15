@@ -37,14 +37,13 @@ function run_simulation( steps, Δt)
     mesh = OneDGrid( xmin, xmax, nx)
     spline_degree = 3
     
-    df = CosSumGaussian{1,1,3}([[kx]], [α], [[σ]], [[μ]] )
+    df = CosGaussian(kx, α, σ, μ )
     
     rng = MersenneTwister(123)
     mass, charge = 1.0, 1.0
     
     particle_group = ParticleGroup( n_particles, mass, charge, 1)   
-    sampler = ParticleSampler( n_particles)
-    sample!(rng, particle_group, sampler, df, mesh)
+    sample!(rng, particle_group, df, mesh)
     set_common_weight(particle_group, (1.0/n_particles))
 
     kernel_smoother2 = ParticleMeshCoupling( mesh, n_particles, spline_degree-2, :galerkin) 
@@ -113,7 +112,7 @@ function run_simulation( steps, Δt)
 
 end
 
-steps, Δt = 100, 0.05
+steps, Δt = 200, 0.05
 
 thdiag = run_simulation(steps, Δt)
 

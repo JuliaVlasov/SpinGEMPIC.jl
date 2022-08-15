@@ -1,29 +1,6 @@
 using Sobol, Random, Distributions
 using LinearAlgebra
 
-export ParticleSampler
-
-"""
-    ParticleSampler{D,V,S}( sampling_type, symmetric, dims, n_particles)
-
-Particle initializer class with various functions to initialize a particle.
-
-- `sampling_type` : `:random` or `:sobol`
-- `symmetric` : `true` or `false`
-- `n_particles` : number of particles
-"""
-struct ParticleSampler
-
-    n_particles::Int
-
-    function ParticleSampler( n_particles::Int64)
-
-        new(n_particles)
-
-    end
-
-end
-
 export sample!
 
 """
@@ -37,7 +14,7 @@ Sample from a Particle sampler
 - `xmin` : lower bound of the domain
 - `Lx`   : length of the domain.
 """
-function sample!(rng, pg, ps :: ParticleSampler, df::AbstractCosGaussian, mesh)
+function sample!(rng, pg, df::AbstractCosGaussian, mesh)
 
     s = zeros(3)
     theta = 0.0
