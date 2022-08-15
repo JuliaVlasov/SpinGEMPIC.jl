@@ -334,18 +334,24 @@ function operatorHs(h::HamiltonianSplitting, particle_group, dt::Float64)
         s2 = particle_group.array[4, i_part]
         s3 = particle_group.array[5, i_part]
 
-        S .= [s1, s2, s3]
+        S[1] = s1
+        S[2] = s2
+        S[3] = s3
 
         vnorm = sqrt(Z*Z+Y*Y)
 
         α = ( sin(dt * vnorm) / vnorm * hat_v +
              0.5 * (sin(0.5dt * vnorm) / (0.5vnorm))^2 * hat_v^2)
 
-        particle_group.array[3:5, i_part] .= S .+ α * S
+        St .= S
+        BLAS.gemm!('N','N', 1., α, S, 1., St)
+        particle_group.array[3:5, i_part] .= St
 
         β = ( 2 * (sin(0.5dt * vnorm) / vnorm)^2 * hat_v + 2.0 / (vnorm^2) *
                     (0.5dt - sin(dt * vnorm) / 2 / vnorm) * hat_v^2) 
-        St .= dt .* S .+ β * S
+
+        St .= S
+        BLAS.gemm!('N','N', 1., β, S, dt, St)
 
         wi = charge * particle_group.array[6, i_part] 
 
