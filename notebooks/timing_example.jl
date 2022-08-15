@@ -42,7 +42,7 @@ function run_simulation( steps, Δt)
     rng = MersenneTwister(123)
     mass, charge = 1.0, 1.0
     
-    particle_group = ParticleGroup{1,1,3}( n_particles, mass, charge, 1)   
+    particle_group = ParticleGroup( n_particles, mass, charge, 1)   
     sampler = ParticleSampler{1,1,3}( n_particles)
     sample!(rng, particle_group, sampler, df, mesh)
     set_common_weight(particle_group, (1.0/n_particles))
@@ -113,7 +113,7 @@ function run_simulation( steps, Δt)
 
 end
 
-steps, Δt = 500, 0.05
+steps, Δt = 100, 0.05
 
 thdiag = run_simulation(steps, Δt)
 

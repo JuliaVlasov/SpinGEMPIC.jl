@@ -101,8 +101,8 @@ function sample!(rng, pg, ps :: ParticleSampler, df::AbstractCosGaussian, mesh)
         w = w * eval_x_density(df, x) .* prod(mesh.dimx)
 
         # Copy the generated numbers to the particle
-        set_x(pg, i_part, x)
-        set_v(pg, i_part, v)
+        set_x(pg, i_part, x[1])
+        set_v(pg, i_part, v[1])
         set_s1(pg, i_part, s[1])
         set_s2(pg, i_part, s[2])
         set_s3(pg, i_part, s[3])

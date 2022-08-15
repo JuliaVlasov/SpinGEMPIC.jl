@@ -9,7 +9,7 @@ import GEMPIC: AbstractParticleMeshCoupling
 export ParticleMeshCoupling
 
 """
-    ParticleMeshCoupling( domain, n_grid, 
+    ParticleMeshCoupling( mesh,
                           no_particles, spline_degree, 
                           smoothing_type )
     
@@ -17,8 +17,8 @@ Kernel smoother with splines of arbitrary degree placed on a uniform mesh.
 Spline with index i starts at point i
 
 - `delta_x` : Value of grid spacing along both directions.
-- `domain` : Definition of the domain: domain(1:2) = x1_min, x1_max
-- `n_grid` : Array containing number ofpoints along each direction
+- `xmin, xmax, dimx` : Definition of the domain
+- `nx` : Array containing number ofpoints along each direction
 - `no_particles` : Number of particles of underlying PIC method 
 - `spline_degree` : Degree of smoothing kernel spline
 - `n_span` : Number of intervals where spline non zero (spline_degree + 1)
@@ -36,9 +36,11 @@ Spline with index i starts at point i
 mutable struct ParticleMeshCoupling <: AbstractParticleMeshCoupling
 
     dims::Int
-    domain::Vector{Float64}
+    xmin::Float64
+    xmax::Float64
+    dimx::Float64
     delta_x::Float64
-    n_grid::Vector{Int}
+    nx::Int
     n_dofs::Int
     no_particles::Int
     spline_degree::Int
@@ -57,11 +59,11 @@ mutable struct ParticleMeshCoupling <: AbstractParticleMeshCoupling
         spline_degree::Int,
         smoothing_type::Symbol,
     )
-        domain = [mesh.xmin, mesh.xmax, mesh.dimx]
-        n_grid = [mesh.nx]
+        xmin, xmax, dimx = mesh.xmin, mesh.xmax, mesh.dimx
+        nx = mesh.nx
         dims = 1
-        n_dofs = prod(n_grid)
-        delta_x = (domain[2] - domain[1]) / n_grid[1]
+        n_dofs = nx
+        delta_x = (xmax - xmin) / nx
         n_span = spline_degree + 1
 
         if smoothing_type == :collocation
@@ -82,13 +84,13 @@ mutable struct ParticleMeshCoupling <: AbstractParticleMeshCoupling
 
         quad_x, quad_w = gausslegendre(n_quad_points)
 
-        spline_pp = SplinePP(spline_degree, n_grid[1])
+        spline_pp = SplinePP(spline_degree, nx)
 
         new(
             dims,
-            domain,
+            xmin, xmax, dimx,
             delta_x,
-            n_grid,
+            nx,
             n_dofs,
             no_particles,
             spline_degree,
@@ -123,14 +125,14 @@ function add_charge!(
     position::Float64,
     marker_charge::Float64,
 )
-    xi = (position - p.domain[1]) / p.delta_x
+    xi = (position - p.xmin) / p.delta_x
     index = trunc(Int, xi)
     xi = xi - index
     index = index - p.spline_degree
 
     uniform_bsplines_eval_basis!(p.spline_val, p.spline_degree, xi)
 
-    nx = p.n_grid[1]
+    nx = p.nx
 
     @inbounds for i in 1:(p.n_span)
         index1d = mod1(index + i, nx)
@@ -163,13 +165,13 @@ function add_current_update_v!(
 )
 
 
-    xi = (position_old - p.domain[1]) / p.delta_x
+    xi = (position_old - p.xmin) / p.delta_x
     index_old = floor(Int64, xi)
     r_old = xi - index_old
 
     # Compute the new box index index_new and normalized position r_old.
 
-    xi = (position_new - p.domain[1]) / p.delta_x
+    xi = (position_new - p.xmin) / p.delta_x
     index_new = floor(Int64, xi)
     r_new = xi - index_new
 
@@ -245,7 +247,7 @@ function update_jv!(
     vi::Float64,
 )
 
-    n_cells = p.n_grid[1]
+    n_cells = p.nx
 
     c1 = 0.5 * (upper - lower)
     c2 = 0.5 * (upper + lower)
@@ -288,7 +290,7 @@ Evaluate field at `position`
 """
 function evaluate(p::ParticleMeshCoupling, position::Float64, field_dofs::Vector{Float64})
 
-    xi = (position[1] - p.domain[1]) / p.delta_x
+    xi = (position[1] - p.xmin) / p.delta_x
     index = floor(Int64, xi) + 1
     xi = xi - (index - 1)
     index = index - p.spline_degree
@@ -296,7 +298,7 @@ function evaluate(p::ParticleMeshCoupling, position::Float64, field_dofs::Vector
 
     field_value = 0.0
     @inbounds for i = 1:p.n_span
-        index1d = mod(index + i - 2, p.n_grid[1]) + 1
+        index1d = mod(index + i - 2, p.nx) + 1
         field_value += field_dofs[index1d] * p.spline_val[i]
     end
 

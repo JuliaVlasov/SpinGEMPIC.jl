@@ -4,17 +4,14 @@ abstract type AbstractParticleGroup end
 
 """
 
-    ParticleGroup{D,V,S}( n_particles, 
-                        charge, 
-                        mass, 
-                        n_weights)
+    ParticleGroup( n_particles, charge, mass, n_weights)
 
 - `n_particles` : number of particles 
 - `charge`      : charge of the particle species
 - `mass`        : mass of the particle species
 - `n_weights`   : number of differents weights
 """
-mutable struct ParticleGroup{D,V,S} <: AbstractParticleGroup
+mutable struct ParticleGroup <: AbstractParticleGroup
 
     dims::Tuple{Int64,Int64,Int64}
     n_particles::Int64
@@ -25,9 +22,9 @@ mutable struct ParticleGroup{D,V,S} <: AbstractParticleGroup
     n_weights::Int64
     q_over_m::Float64
 
-    function ParticleGroup{D,V,S}(n_particles, charge, mass, n_weights) where {D,V,S}
+    function ParticleGroup(n_particles, charge, mass, n_weights)
 
-        dims = (D, V, S)
+        dims = (1, 1, 3)
         array = zeros(Float64, (sum(dims) + n_weights, n_particles))
         common_weight = 1.0
         q_over_m = charge / mass
@@ -51,7 +48,7 @@ export get_x
     get_x( p, i )
 Get position of ith particle of p
 """
-@inline get_x(p::ParticleGroup{D,V,S}, i::Int) where {D,V,S} = p.array[1, i]
+@inline get_x(p::ParticleGroup, i::Int) = p.array[1, i]
 
 export get_v
 
@@ -59,7 +56,7 @@ export get_v
     get_v( p, i )
 Get velocity of ith particle of p
 """
-@inline get_v(p::ParticleGroup{D,V,S}, i::Int) where {D,V,S} = p.array[2, i]
+@inline get_v(p::ParticleGroup, i::Int) = p.array[2, i]
 
 
 """  
@@ -67,21 +64,21 @@ get_s1( p, i )
 
 Get s1 of ith particle of p
 """
-@inline get_s1(p::ParticleGroup{D,V,S}, i::Int) where {D,V,S} = p.array[3, i]
+@inline get_s1(p::ParticleGroup, i::Int) = p.array[3, i]
 
 """  
 get_s2( p, i )
 
 Get s2 of ith particle of p
 """
-@inline get_s2(p::ParticleGroup{D,V,S}, i::Int) where {D,V,S} = p.array[4, i]
+@inline get_s2(p::ParticleGroup, i::Int) = p.array[4, i]
 
 """  
 get_s3( p, i )
 
 Get velocity of ith particle of p
 """
-@inline get_s3(p::ParticleGroup{D,V,S}, i::Int64) where {D,V,S} = p.array[5, i]
+@inline get_s3(p::ParticleGroup, i::Int64) = p.array[5, i]
 
 
 """
@@ -89,7 +86,7 @@ Get velocity of ith particle of p
 
 Get charge of ith particle of p (q * particle_weight)
 """
-@inline function get_charge(p::ParticleGroup{D,V,S}, i::Int64; i_wi = 1) where {D,V,S}
+@inline function get_charge(p::ParticleGroup, i::Int64; i_wi = 1)
 
     p.charge * p.array[5+i_wi, i] * p.common_weight
 
@@ -101,9 +98,9 @@ end
 
 Get mass of ith particle of p (m * particle_weight)
 """
-@generated function get_mass(p::ParticleGroup{D,V,S}, i::Int64; i_wi = 1) where {D,V,S}
+@inline function get_mass(p::ParticleGroup, i::Int64; i_wi = 1)
 
-    :(p.mass * p.array[$D+$V+$S+i_wi, i] * p.common_weight)
+    p.mass * p.array[5+i_wi, i] * p.common_weight
 
 end
 
@@ -112,9 +109,9 @@ end
 
 Get ith particle weights of group p
 """
-@generated function get_weights(p::ParticleGroup{D,V,S}, i::Int64) where {D,V,S}
+@inline function get_weights(p::ParticleGroup, i::Int64) 
 
-    :(p.array[$D+$V+$S+1, i])
+    p.array[6, i]
 
 end
 
@@ -123,51 +120,9 @@ end
 
 Set position of ith particle of p to x 
 """
-@generated function set_x(
-    p::ParticleGroup{D,V,S},
-    i::Int64,
-    x::Vector{Float64},
-) where {D,V,S}
+@inline function set_x( p::ParticleGroup, i::Int64, x::Float64)
 
-    :(
-        for j = 1:$D
-            p.array[j, i] = x[j]
-        end
-    )
-
-end
-
-"""
-    set_x( p, i, x)
-
-Set position of ith particle of p to x
-
-!!! note
-    if `x` is a scalar value, only the first x dimension will be set.
-"""
-@generated function set_x(p::ParticleGroup{D,V,S}, i::Int64, x::Float64) where {D,V,S}
-
-    :(p.array[1, i] = x)
-
-end
-
-
-"""
-    set_v( p, i, v)
-
-Set velocity of ith particle of p to v
-"""
-@generated function set_v(
-    p::ParticleGroup{D,V,S},
-    i::Int64,
-    v::Vector{Float64},
-) where {D,V,S}
-
-    :(
-        for j = 1:$V
-            p.array[$D+j, i] = v[j]
-        end
-    )
+    p.array[1, i] = x
 
 end
 
@@ -176,9 +131,9 @@ end
 
 Set velocity of ith particle of p to v
 """
-@generated function set_v(p::ParticleGroup{D,V,S}, i::Int64, v::Float64) where {D,V,S}
+@inline function set_v(p::ParticleGroup, i::Int64, v::Float64) 
 
-    :(p.array[$D+$V, i] = v)
+    p.array[2, i] = v
 
 end
 
@@ -187,9 +142,9 @@ set_s1( p, i, v)
 
 Set velocity of ith particle of p to v
 """
-@generated function set_s1(p::ParticleGroup{D,V,S}, i::Int64, v::Float64) where {D,V,S}
+@inline function set_s1(p::ParticleGroup, i::Int64, v::Float64) 
 
-    :(p.array[$D+$V+1, i] = v)
+    p.array[3, i] = v
 
 end
 
@@ -199,9 +154,9 @@ set_s2( p, i, v)
 
 Set velocity of ith particle of p to v
 """
-@generated function set_s2(p::ParticleGroup{D,V,S}, i::Int64, v::Float64) where {D,V,S}
+@inline function set_s2(p::ParticleGroup, i::Int64, v::Float64)
 
-    :(p.array[$D+$V+2, i] = v)
+    p.array[4, i] = v
 
 end
 
@@ -210,40 +165,21 @@ set_s3( p, i, v)
 
 Set velocity of ith particle of p to v
 """
-@generated function set_s3(p::ParticleGroup{D,V,S}, i::Int64, v::Float64) where {D,V,S}
+@inline function set_s3(p::ParticleGroup, i::Int64, v::Float64) 
 
-    :(p.array[$D+$V+3, i] = v)
-
-end
-
-
-"""
-    set_weights( p, i, w) 
-
-Set weights of ith particle of p to w
-"""
-@generated function set_weights(
-    p::ParticleGroup{D,V,S},
-    i::Int64,
-    w::Vector{Float64},
-) where {D,V,S}
-
-    :(
-        for j = 1:p.n_weights
-            p.array[$D+$V+$S+j, i] = w[j]
-        end
-    )
+    p.array[5, i] = v
 
 end
+
 
 """
     set_weights( p, i, w) 
 
 Set weights of particle @ i
 """
-@generated function set_weights(p::ParticleGroup{D,V,S}, i::Int64, w::Float64) where {D,V,S}
+@inline function set_weights(p::ParticleGroup, i::Int64, w::Float64) 
 
-    :(p.array[$D+$V+$S+1, i] = w)
+    p.array[6, i] = w
 
 end
 
@@ -257,5 +193,3 @@ function set_common_weight(p::AbstractParticleGroup, x::Float64)
     p.common_weight = x
 
 end
-
-
