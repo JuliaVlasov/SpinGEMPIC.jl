@@ -429,7 +429,7 @@ H&= \frac{1}{2}{\mathbf P}^{\mathrm{T}}\mathbb{M}_p{\mathbf P} + \frac{1}{2}\sum
 \end{equation}
 ```
 
-If want to read more about Vlasov--Maxwell equations for laser-plasma interaction, see [^6].
+If you want to read more about Vlasov--Maxwell equations for laser-plasma interaction, see [^6].
 
 
 # References
