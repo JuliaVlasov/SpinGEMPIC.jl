@@ -73,8 +73,7 @@ end
 export TimeHistoryDiagnostics
 
 """
-    TimeHistoryDiagnostics( maxwell_solver, 
-                            kernel_smoother_0, kernel_smoother_1 )
+    TimeHistoryDiagnostics( maxwell_solver, kernel_smoother_0, kernel_smoother_1 )
 
 Context to save and plot diagnostics
 
@@ -82,6 +81,24 @@ Context to save and plot diagnostics
 - `kernel_smoother_0` : Mesh coupling operator
 - `kernel_smoother_1` : Mesh coupling operator
 - `data` : DataFrame containing time history values
+
+Outputs
+
+- KineticEnergy: ``\\frac{1}{2} \\sum \\omega_i v_i^2
+- Kineticspi: Zeeman energy
+
+Momentums: compute integrals of f 
+
+- Momentum1 : ``\\sum x_i  \\omega_i``
+- Momentum2 : ``\\sum x_i * \\omega_i * s1``
+- Momentum3 : ``\\sum x_i * \\omega_i * s2``
+- Momentum4 : ``\\sum x_i * \\omega_i * s3``
+- Momentum5 : ``\\sum \\omega_i * s1``
+- Momentum6 : ``\\sum \\omega_i * s2``
+- Momentum7 : ``\\sum \\omega_i * s3``
+- Momentum8 : `` A_y \\sum div(\\rho)  \\omega_i s2 + A_z div(\\rho) \\omega_i s3``
+- Momentum9 :  ``- A_y div(\\rho)  \\omega_i  s1`` 
+- Momentum10 : ``- A_z div(\\rho) \\omega_i s1``
 """
 mutable struct TimeHistoryDiagnostics
 
