@@ -6,7 +6,11 @@ Pages   = ["hamiltonian_splitting.jl"]
 Private  = false
 ```
 
-## The subsystem corresponding to ``H_p = \frac{1}{2}{\mathbf P}^{\mathrm{T}}\mathbb{M}_p{\mathbf P}`` is 
+## Subsystem corresponding to ``H_p``
+
+```math
+H_p = \frac{1}{2}{\mathbf P}^{\mathrm{T}}\mathbb{M}_p{\mathbf P}
+```
 
 ```@docs
 SpinGEMPIC.operatorHp
@@ -38,7 +42,7 @@ For this subsystem, we only need to compute `` {\mathbf X}, {\mathbf{e}}_x``.
 \end{equation}
 ```
 
-## The subsystem corresponding to ``H_A`` is
+## Subsystem corresponding to ``H_A`
 
 ```@docs
 SpinGEMPIC.operatorHA
@@ -108,7 +112,7 @@ and
 
 which reduces the computational cost.
 
-## The subsystem corresponding to 
+## Subsystem corresponding to ``H_s``
 
 ```@docs
 SpinGEMPIC.operatorHs
@@ -204,7 +208,7 @@ p_a(t) = p_a(0) - {\mathbf a}_z^{\mathrm{T}}\mathbb{C}^{\mathrm{T}}\frac{\partia
 \end{equation}
 ```
 
-## The subsystem corresponding to 
+## Subsystem corresponding to ``H_E
 
 ```@meta
 CurrentModule = SpinGEMPIC
