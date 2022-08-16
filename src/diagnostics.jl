@@ -58,10 +58,10 @@ function pic_diagnostics_transfer(
         wi = get_charge(particle_group, i_part)
         vi = get_v(particle_group, i_part)
 
-        efield_1 = evaluate(kernel_smoother_1, xi[1], efield_dofs[1])
-        efield_2 = evaluate(kernel_smoother_0, xi[1], efield_dofs[2])
+        efield_1 = evaluate(kernel_smoother_1, xi, efield_dofs[1])
+        efield_2 = evaluate(kernel_smoother_0, xi, efield_dofs[2])
 
-        transfer += (vi[1] * efield_1) * wi
+        transfer += (vi * efield_1) * wi
 
     end
 
@@ -169,9 +169,9 @@ function write_step!(
         wi = get_mass(particle_group, i_part)
 
         # Kinetic energy
-        v2 = evaluate(thdiag.kernel_smoother_0, xi[1], afield_dofs[1])
-        v3 = evaluate(thdiag.kernel_smoother_0, xi[1], afield_dofs[2])
-        diagnostics[1] += 0.5 * (vi[1]^2 + v2[1]^2 + v3[1]^2) * wi[1]  # 0.5 * wi[1] * vi[1]^2  
+        v2 = evaluate(thdiag.kernel_smoother_0, xi, afield_dofs[1])
+        v3 = evaluate(thdiag.kernel_smoother_0, xi, afield_dofs[2])
+        diagnostics[1] += 0.5 * (vi^2 + v2^2 + v3^2) * wi # 0.5 * wi[1] * vi[1]^2  
 
         #Zeeman energy
         add_charge!(propagator.j_dofs[2], propagator.kernel_smoother_1, xi, 1.0)
@@ -187,13 +187,13 @@ function write_step!(
             )
 
         # Momentum: compute integrals of f like <s* f> = int s* f dx dp ds
-        diagnostics[3] += xi[1] * wi[1]
-        diagnostics[4] += xi[1] * wi[1] * s1
-        diagnostics[5] += xi[1] * wi[1] * s2
-        diagnostics[6] += xi[1] * wi[1] * s3
-        diagnostics[7] += wi[1] * s1
-        diagnostics[8] += wi[1] * s2
-        diagnostics[9] += wi[1] * s3
+        diagnostics[3] += xi * wi
+        diagnostics[4] += xi * wi * s1
+        diagnostics[5] += xi * wi * s2
+        diagnostics[6] += xi * wi * s3
+        diagnostics[7] += wi * s1
+        diagnostics[8] += wi * s2
+        diagnostics[9] += wi * s3
         diagnostics[10] += (
             afield_dofs[1]' * propagator.j_dofs[1] * wi * s2 +
             afield_dofs[2]' * propagator.j_dofs[1] * wi * s3
@@ -224,10 +224,10 @@ function write_step!(
 
     # Magnetic energy
     nn = thdiag.kernel_smoother_0.n_dofs
-    aa = zeros(Float64, nn)
+    aa = zeros(nn)
     compute_lderivatives_from_basis!(aa, thdiag.maxwell_solver, afield_dofs[1])
     potential_energy[4] = 0.5 * l2norm_squared(thdiag.maxwell_solver, aa, degree - 1)
-    bb = zeros(Float64, nn)
+    bb = zeros(nn)
     compute_lderivatives_from_basis!(bb, thdiag.maxwell_solver, afield_dofs[2])
     potential_energy[5] = 0.5 * l2norm_squared(thdiag.maxwell_solver, bb, degree - 1)
 
@@ -244,86 +244,3 @@ function write_step!(
 end
 
 
-export evaluate
-
-"""
-    evaluate( kernel_smoother, field_dofs,  xi, n_dofs )
-
-Evaluate the field at points xi
-
-- `field_dofs` : field value on dofs
-- `xi` : positions where the field is evaluated
-"""
-function evaluate(
-    kernel_smoother::ParticleMeshCoupling,
-    field_dofs::AbstractArray,
-    x::AbstractArray,
-)
-
-    field_grid = similar(x)
-    for j in eachindex(x)
-        field_grid[j] = evaluate(kernel_smoother, x[j], field_dofs)
-    end
-    field_grid
-
-end
-
-"""
-    pic_diagnostics_hpi( particle_group,  index, kinetic )
-
-compute v(index)-part of kinetic energy
-
-- `particle_group` 
-- `index` : velocity component
-- `kinetic` : value of index part of kinetic energy
-
-"""
-function pic_diagnostics_hpi(particle_group, index, kinetic)
-
-    kinetic = 0.0
-    for i_part = 1:particle_group.n_particles
-        vi = get_v(particle_group, i_part)
-        wi = get_mass(particle_group, i_part)
-        kinetic += kinetic_local + (vi[index]^2) * wi[1]
-    end
-
-    kinetic
-
-end
-
-"""
-    eval_derivative_spline( position, xmin, delta_x, n_grid, 
-                            field_dofs, degree, derivative )
-
-Compute the spline coefficient of the derivative of some given spline expansion
-
-- `position` : particle position
-- `xmin` : lower boundary of the domain
-- `delta_x` : step 
-- `n_grid` : number of grid points
-- `field_dofs` : coefficients of spline representation of the field
-- `degree` : degree of spline
-- `derivative` : value of the derivative
-"""
-function eval_derivative_spline(position, xmin, delta_x, n_grid, field_dofs, degree)
-
-    der_degree = degree - 1
-
-    xi = (position[1] - xmin) / delta_x
-    index = ceil(xi)
-    xi = xi - (index - 1)
-    index = index - der_degree
-
-    spline_val = uniform_bsplines_eval_basis(der_degree, xi)
-
-    derivative = 0.0
-
-    for i1 = 1:degree
-        ind = mod(index + i1 - 2, n_grid) + 1
-        derivative +=
-            spline_val[i1] * (field_dofs[ind] - field_dofs[mod(ind - 2, n_grid)+1])
-    end
-
-    derivative / delta_x
-
-end
