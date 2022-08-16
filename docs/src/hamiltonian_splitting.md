@@ -42,7 +42,7 @@ For this subsystem, we only need to compute `` {\mathbf X}, {\mathbf{e}}_x``.
 \end{equation}
 ```
 
-## Subsystem corresponding to ``H_A`
+## Subsystem corresponding to ``H_A``
 
 ```@docs
 SpinGEMPIC.operatorHA
@@ -208,7 +208,7 @@ p_a(t) = p_a(0) - {\mathbf a}_z^{\mathrm{T}}\mathbb{C}^{\mathrm{T}}\frac{\partia
 \end{equation}
 ```
 
-## Subsystem corresponding to ``H_E
+## Subsystem corresponding to ``H_E``
 
 ```@meta
 CurrentModule = SpinGEMPIC
