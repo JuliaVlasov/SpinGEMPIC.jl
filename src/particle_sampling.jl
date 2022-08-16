@@ -8,11 +8,10 @@ export sample!
 
 Sample from a Particle sampler
 
+- `rnd`  : Random generator 
 - `pg`   : Particle group
-- `ps`   : Particle sampler
 - `df`   : Distribution function
-- `xmin` : lower bound of the domain
-- `Lx`   : length of the domain.
+- `mesh` : Domain
 """
 function sample!(rng, pg, df::AbstractCosGaussian, mesh)
 
