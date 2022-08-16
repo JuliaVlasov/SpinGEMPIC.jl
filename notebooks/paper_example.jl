@@ -57,9 +57,9 @@ function run_simulation( steps, Δt)
     sample!(rng, particle_group, df, mesh)
     set_common_weight(particle_group, (1.0/n_particles))
 
-    kernel_smoother2 = ParticleMeshCoupling( mesh, n_particles, spline_degree-2, :galerkin) 
-    kernel_smoother1 = ParticleMeshCoupling( mesh, n_particles, spline_degree-1, :galerkin)    
-    kernel_smoother0 = ParticleMeshCoupling( mesh, n_particles, spline_degree, :galerkin)
+    kernel_smoother2 = ParticleMeshCoupling( mesh, n_particles, spline_degree-2) 
+    kernel_smoother1 = ParticleMeshCoupling( mesh, n_particles, spline_degree-1)    
+    kernel_smoother0 = ParticleMeshCoupling( mesh, n_particles, spline_degree)
     
     maxwell_solver = Maxwell1DFEM(mesh, spline_degree)
 
