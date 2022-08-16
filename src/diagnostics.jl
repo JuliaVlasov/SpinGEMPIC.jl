@@ -129,7 +129,7 @@ export write_step!
 
 """
     write_step!( thdiag, time, degree, efield_dofs, bfield_dofs,
-                 efield_dofs_n, efield_poisson)
+                 efield_poisson, propagator, particle_group)
 
 write diagnostics for PIC
 - `time` : Time
@@ -148,7 +148,6 @@ function write_step!(
     degree,
     efield_dofs,
     afield_dofs,
-    efield_dofs_n,
     efield_poisson,
     propagator,
     particle_group

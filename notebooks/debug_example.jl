@@ -71,8 +71,6 @@ propagator = HamiltonianSplitting( maxwell_solver,
                                    afield_dofs,
                                    domain);
 
-efield_dofs_n = propagator.e_dofs
-
 operatorHE(propagator, particle_group, 0.5Δt)
 operatorHp(propagator, particle_group, 0.5Δt)
 operatorHA(propagator, particle_group, 0.5Δt)

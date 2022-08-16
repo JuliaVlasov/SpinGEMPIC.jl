@@ -82,14 +82,12 @@ function run_simulation( steps, Δt)
                                        afield_dofs,
                                        domain);
     
-    efield_dofs_n = propagator.e_dofs
-    
     thdiag = TimeHistoryDiagnostics( maxwell_solver, 
                             kernel_smoother0, kernel_smoother1 );
     
     write_step!(thdiag, 0.0, spline_degree,
                         efield_dofs,  afield_dofs,
-                        efield_dofs_n, efield_poisson, 
+                        efield_poisson, 
                         propagator, particle_group)
     
     @showprogress 1 for j = 1:steps # loop over time
@@ -105,7 +103,7 @@ function run_simulation( steps, Δt)
     
         write_step!(thdiag, j * Δt, spline_degree, 
                         efield_dofs,  afield_dofs,
-                        efield_dofs_n, efield_poisson, 
+                        efield_poisson, 
                         propagator, particle_group)
     end
 
