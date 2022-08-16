@@ -108,7 +108,7 @@ end
 export strang_splitting!
 
 """
-    strang_splitting( h, dt, number_steps)
+    strang_splitting( h, pg, dt, number_steps)
 
 Strang splitting
 - time splitting object 
@@ -132,7 +132,8 @@ function strang_splitting!(h::HamiltonianSplitting, pg::ParticleGroup, dt::Float
 end
 
 """
-    operatorHp(h, dt)
+    operatorHp(h, particle_group, dt)
+
 ```math
 \\begin{aligned}
 \\dot{x} & =p \\\\
@@ -140,7 +141,6 @@ end
 \\end{aligned}
 ```
 """
-
 function operatorHp(h::HamiltonianSplitting, particle_group, dt::Float64)
 
     nx :: Int = h.kernel_smoother_0.n_dofs
@@ -181,7 +181,8 @@ end
 
 
 """
-    operatorHA(h, dt)
+    operatorHA(h, particle_group, dt)
+
 ```math
 \\begin{aligned}
 \\dot{p} = (A_y, A_z) \\cdot \\partial_x (A_y, A_z)   \\\\
@@ -190,7 +191,6 @@ end
 \\end{aligned}
 ```
 """
-
 function operatorHA(h::HamiltonianSplitting, particle_group, dt::Float64)
 
     nx :: Int = h.kernel_smoother_0.n_dofs
@@ -251,7 +251,8 @@ end
 
 
 """
-    operatorHE(h, dt)
+    operatorHE(h, particle_group, dt)
+
 ```math
 \\begin{aligned}
 \\dot{v}   & =  E_x \\\\
@@ -260,7 +261,6 @@ end
 \\end{aligned}
 ```
 """
-
 function operatorHE(h::HamiltonianSplitting, particle_group, dt::Float64)
 
 
@@ -282,7 +282,8 @@ end
 
 
 """
-    operatorHs(h, dt)
+    operatorHs(h, particle_group, dt)
+
 Push H_s: Equations to be solved
 ```math
 \\begin{aligned}
@@ -293,7 +294,6 @@ Push H_s: Equations to be solved
 \\end{aligned}
 ```
 """
-
 function operatorHs(h::HamiltonianSplitting, particle_group, dt::Float64)
     HH = 0.00022980575
     nx :: Int = h.kernel_smoother_0.n_dofs
