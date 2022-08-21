@@ -1,5 +1,7 @@
 module SpinGEMPIC
 
+using Distributed
+
 # Utilities
 include("distributions.jl")
 
@@ -14,6 +16,10 @@ include("particle_sampling.jl")
 
 # Splittings
 include("hamiltonian_splitting.jl")
+include("hp.jl")
+include("ha.jl")
+include("he.jl")
+include("hs.jl")
 
 # Diagnostics
 include("diagnostics.jl")
