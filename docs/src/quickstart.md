@@ -52,6 +52,16 @@ You can plot ten times less particles
 sphereplot(particle_group, 10)
 ```
 
+```@example quickstart
+xp = view(particle_group.array, 1, :)
+vp = view(particle_group.array, 2, :)
+wp = view(particle_group.array, 6, :)
+p = plot(layout=(2,1))
+histogram!(p[1], xp, weights=wp, normalize= true, bins = 100, lab = "")
+plot!(p[1], x-> (1+α*cos(kx*x))/(4π/kx), 0., 4π/kx, lab="")
+histogram!(p[2], vp, weights=wp, normalize=true, bins = 100, lab = "")
+plot!(p[2], v-> 1/sqrt(2pi)/σ*(exp(-(v-μ)^2 / 2/σ/σ)), -1, 1, lab="")
+```
 
 ## Initialize Maxwell solver
 
