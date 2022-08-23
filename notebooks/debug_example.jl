@@ -1,3 +1,4 @@
+using Plots
 using Random
 using SpinGEMPIC
 
@@ -78,3 +79,5 @@ operatorHs(propagator, particle_group, 1.0Δt)
 operatorHA(propagator, particle_group, 0.5Δt)
 operatorHp(propagator, particle_group, 0.5Δt)
 operatorHE(propagator, particle_group, 0.5Δt)
+
+sphereplot(particle_group, 1)

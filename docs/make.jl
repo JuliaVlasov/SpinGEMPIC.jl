@@ -16,6 +16,7 @@ makedocs(
                             ),
     modules = [SpinGEMPIC],
     pages = ["Documentation" => ["index.md",
+                                 "quickstart.md",
                                  "example.md",
                                  "particle_mesh_coupling.md",
                                  "distributions.md",

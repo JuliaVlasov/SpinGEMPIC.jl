@@ -17,5 +17,6 @@ include("hamiltonian_splitting.jl")
 
 # Diagnostics
 include("diagnostics.jl")
+include("sphere.jl")
 
 end

@@ -1,6 +1,6 @@
-# Example
+# Paper example
 
-Test corresponding to Fig. 4 of the paper 
+Test corresponding to Fig. 4 of the [paper](https://hal.inria.fr/hal-03148534v2/document) 
 
 ```@example paper
 using Plots
