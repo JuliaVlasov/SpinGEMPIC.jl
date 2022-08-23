@@ -1,6 +1,8 @@
 using Documenter
 using SpinGEMPIC
 
+ENV["GKSwstype"] = "100"
+
 makedocs(
     sitename = "SpinGEMPIC",
     format = Documenter.HTML(;
