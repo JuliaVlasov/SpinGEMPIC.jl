@@ -1,5 +1,5 @@
 using Sobol, Random, Distributions
-using LinearAlgebra
+import LinearAlgebra: norm
 
 export sample!
 
@@ -24,28 +24,17 @@ function sample!(rng, pg, df::AbstractCosGaussian, mesh)
 
     rng_sobol = SobolSeq(1)
 
-    d = Normal()
+    σ, μ = df.params.σ[1][1], df.params.μ[1][1]
+    d = Normal(μ, σ)
 
     for i_part = 1:pg.n_particles
 
         x = mesh.xmin + Sobol.next!(rng_sobol)[1] * mesh.dimx
-
-        # Sampling in v
         v = rand(rng, d)
 
-        v = v * df.params.σ[1][1] + df.params.μ[1][1]
-
-        # Wigner type initial condition 1/(4pi) (1+eta*s[3]) fM(v)
-        for tt = 1:10
-            s[1] = randn(rng)
-            s[2] = randn(rng)
-            s[3] = randn(rng)
-            if norm(s) > 10^(-4)
-                break
-            end
-        end
+        randn!(rng, s)
         s .= s ./ norm(s)
-        w = 1 / (4pi) * (1 + 0.5 * s[3]) .* 4pi
+        w = 1 + 0.5 * s[3]
 
         # Set weight according to value of perturbation
         w = w * eval_x_density(df, x) * mesh.dimx

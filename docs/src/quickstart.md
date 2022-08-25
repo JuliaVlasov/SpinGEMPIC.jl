@@ -33,7 +33,7 @@ mesh = OneDGrid( xmin, xmax, nx)
 
 
 ```@example quickstart
-n_particles = 10000
+n_particles = 100000
 
 df = CosGaussian(kx, α, σ, μ)
 
@@ -43,22 +43,32 @@ mass, charge = 1.0, 1.0
 particle_group = ParticleGroup( n_particles, mass, charge, 1)   
 sample!(rng, particle_group, df, mesh)
 set_common_weight(particle_group, (1.0/n_particles))
-sphereplot(particle_group)
 ```
 
-You can plot ten times less particles
-
 ```@example quickstart
-sphereplot(particle_group, 10)
+sphereplot(particle_group, 100) # plot 1000 particles
 ```
 
 ```@example quickstart
 xp = view(particle_group.array, 1, :)
 vp = view(particle_group.array, 2, :)
+s1 = view(particle_group.array, 3, :)
+s2 = view(particle_group.array, 4, :)
+s3 = view(particle_group.array, 5, :)
 wp = view(particle_group.array, 6, :)
+
+p = plot(layout=(3,1))
+histogram!(p[1], s1, weights=wp, normalize=true, bins = 100, lab = "")
+histogram!(p[2], s2, weights=wp, normalize=true, bins = 100, lab = "")
+histogram!(p[3], s3, weights=wp, normalize=true, bins = 100, lab = "")
+plot!(p[3], x -> (1 + x / 2) / 2, -1, 1, lab="")
+```
+
+```@example quickstart
 p = plot(layout=(2,1))
 histogram!(p[1], xp, weights=wp, normalize= true, bins = 100, lab = "")
 plot!(p[1], x-> (1+α*cos(kx*x))/(4π/kx), 0., 4π/kx, lab="")
+ylims!(p[1], (0.09,0.11))
 histogram!(p[2], vp, weights=wp, normalize=true, bins = 100, lab = "")
 plot!(p[2], v-> 1/sqrt(2pi)/σ*(exp(-(v-μ)^2 / 2/σ/σ)), -1, 1, lab="")
 ```
