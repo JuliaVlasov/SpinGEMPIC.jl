@@ -28,8 +28,7 @@ function run_simulation( steps, Δt)
     mass, charge = 1.0, 1.0
     
     particle_group = ParticleGroup( n_particles, mass, charge, 1)   
-    sample!(rng, particle_group, df, mesh)
-    set_common_weight(particle_group, (1.0/n_particles))
+    sample!(rng, particle_group, df, mesh, method = :quietstart)
 
     kernel_smoother2 = ParticleMeshCoupling( mesh, n_particles, spline_degree-2) 
     kernel_smoother1 = ParticleMeshCoupling( mesh, n_particles, spline_degree-1)    

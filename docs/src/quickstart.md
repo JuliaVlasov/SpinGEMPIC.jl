@@ -33,7 +33,7 @@ mesh = OneDGrid( xmin, xmax, nx)
 
 
 ```@example quickstart
-n_particles = 100000
+n_particles = 20000
 
 df = CosGaussian(kx, α, σ, μ)
 
@@ -41,12 +41,11 @@ rng = MersenneTwister(123)
 mass, charge = 1.0, 1.0
 
 particle_group = ParticleGroup( n_particles, mass, charge, 1)   
-sample!(rng, particle_group, df, mesh)
-set_common_weight(particle_group, (1.0/n_particles))
+sample!(rng, particle_group, df, mesh, method = :quietstart)
 ```
 
 ```@example quickstart
-sphereplot(particle_group, 100) # plot 1000 particles
+sphereplot(particle_group, 10) # plot 2000 particles
 ```
 
 ```@example quickstart

@@ -1,5 +1,7 @@
 module SpinGEMPIC
 
+using LinearAlgebra
+
 # Utilities
 include("distributions.jl")
 

@@ -2,12 +2,6 @@ using Plots
 using Random
 using SpinGEMPIC
 
-import SpinGEMPIC: set_common_weight
-import SpinGEMPIC: get_s1, get_s2, get_s3
-import SpinGEMPIC: set_s1, set_s2, set_s3
-import SpinGEMPIC: set_weights, get_weights
-import SpinGEMPIC: set_x, set_v
-
 import SpinGEMPIC: operatorHE
 import SpinGEMPIC: operatorHp
 import SpinGEMPIC: operatorHA
@@ -33,8 +27,7 @@ rng = MersenneTwister(123)
 mass, charge = 1.0, 1.0
 
 particle_group = ParticleGroup( n_particles, mass, charge, 1)   
-sample!(rng, particle_group, df, mesh)
-set_common_weight(particle_group, (1.0/n_particles))
+sample!(rng, particle_group, df, mesh, method = :weighted)
 
 kernel_smoother2 = ParticleMeshCoupling( mesh, n_particles, spline_degree-2) 
 kernel_smoother1 = ParticleMeshCoupling( mesh, n_particles, spline_degree-1)    
