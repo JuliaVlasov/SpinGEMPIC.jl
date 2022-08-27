@@ -89,12 +89,12 @@ function run_simulation( steps, Δt)
 
 end
 
-steps, Δt = 100, 0.05
+steps, Δt = 200, 0.05
 
 thdiag = run_simulation(steps, Δt)
 
 time = thdiag.data[!, :Time]
-energy = thdiag.data[!, :PotentialEnergy1]
-plot( time, 0.5*log.(energy.^2), xlabel = "time", ylabel = "kinetic energy", label = "new")
+energy = thdiag.data[!, :PotentialEnergyE1]
+plot( time, 0.5*log.(energy.^2), xlabel = "time", ylabel = "Ex energy", label = "")
 ```
 
