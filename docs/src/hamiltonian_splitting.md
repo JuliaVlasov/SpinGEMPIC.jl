@@ -2,7 +2,7 @@
 
 ```@autodocs
 Modules = [SpinGEMPIC]
-Pages   = ["hamiltonian_splitting.jl"]
+Pages   = ["hamiltonian_splitting.jl","hp.jl","hs.jl","ha.jl","he.jl"]
 Private  = false
 ```
 
