@@ -113,7 +113,7 @@ show(to)
 ref = CSV.read("frame.csv", DataFrame)
 
 time = thdiag.data[!, :Time]
-nrj2 = thdiag.data[!, :PotentialEnergyE1]
+nrj1 = thdiag.data[!, :PotentialEnergyE1]
 plot( time, 0.5*log.(nrj1.^2), xlabel = "time", ylabel = "Ex energy", label = "quietstart")
 
 time = ref[!, :Time]
