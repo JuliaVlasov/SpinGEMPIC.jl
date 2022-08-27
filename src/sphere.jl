@@ -40,9 +40,6 @@ using RecipesBase
     xlims --> (-1,1)
     ylims --> (-1,1)
     zlims --> (-1,1)
-    zcolor := w
-    palette := :rainbow
-    colorbar := true
 
     s1, s2, s3
 

@@ -1,29 +1,42 @@
-using Plots, Sobol
+using Plots
+using Random
+using SpinGEMPIC
 
-n = 10000
-alpha, kx = 0.1, 0.5
-xmin, xmax = 0.0, 2π/kx
-dx = (xmax - xmin) / (n-1)
-x = LinRange(xmin, xmax, n) |> collect
-f = 1 .+ alpha*cos.(kx .* x)
-dy = 2.0 / (n-1)
-y = LinRange(-1, 1, n) |> collect
-g = ( 1 .+ y ./ 2)
-v = cumsum(f)*dx 
-w = cumsum(g)*dy 
-s  = SobolSeq(1)
-xp = Float64[]
-sp = Float64[]
-for k=1:n
-   r = next!(s)[1]
-   i = findmin(abs.(v .- r * 4π) )[2]
-   j = findmin(abs.(w .- 2r))[2]
-   push!(xp,  x[i])
-   push!(sp,  y[j])
-end
+import GEMPIC: OneDGrid
 
-p = plot(layout=(2,1))
-histogram!(p[1], xp, normalize=true, bins = 100)
-plot!(x-> (1+alpha*cos(kx*x))/4π, 0., 4π)
-histogram!(p[2], sp, normalize=true, bins = 100)
-plot!(p[2], x -> (1 + x / 2) / 2, -1, 1, lab="")
+σ, μ = 0.17, 0.0
+kx, α = 1.22, 0.02
+
+xmin, xmax = 0, 4pi/kx
+nx = 128
+mesh = OneDGrid( xmin, xmax, nx)
+
+n_particles = 20000
+
+df = CosGaussian(kx, α, σ, μ)
+
+rng = MersenneTwister(123)
+mass, charge = 1.0, 1.0
+
+particle_group = ParticleGroup( n_particles, mass, charge, 1)   
+sample!(rng, particle_group, df, mesh, method = :quietstart)
+
+
+xp = view(particle_group.array, 1, :)
+vp = view(particle_group.array, 2, :)
+s1 = view(particle_group.array, 3, :)
+s2 = view(particle_group.array, 4, :)
+s3 = view(particle_group.array, 5, :)
+wp = view(particle_group.array, 6, :)
+
+p = plot(layout=(6,1))
+#sphereplot!(p[1], particle_group, 10) # plot 2000 particles
+histogram!(p[2], s1, weights=wp, normalize=true, bins = 100, lab = "")
+histogram!(p[3], s2, weights=wp, normalize=true, bins = 100, lab = "")
+histogram!(p[4], s3, weights=wp, normalize=true, bins = 100, lab = "")
+plot!(p[4], x -> (1 + x / 2) / 2, -1, 1, lab="")
+histogram!(p[5], xp, weights=wp, normalize= true, bins = 100, lab = "")
+plot!(p[5], x-> (1+α*cos(kx*x))/(4π/kx), 0., 4π/kx, lab="")
+ylims!(p[5], (0.09,0.11))
+histogram!(p[6], vp, weights=wp, normalize=true, bins = 100, lab = "")
+plot!(p[6], v-> 1/sqrt(2pi)/σ*(exp(-(v-μ)^2 / 2/σ/σ)), -1, 1, lab="")

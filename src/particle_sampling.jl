@@ -122,7 +122,7 @@ function sample_quietstart!(rng, pg, df, mesh)
         j = findmin(abs.(cdf_g .- 2z1))[2]
 
         s3 = y[j]
-        θ = 4π * z2 # z2 ∈ [0,0.5]
+        θ = 4π * z2 
 
         s1 = sin(θ) * sqrt(1-s3^2)
         s2 = cos(θ) * sqrt(1-s3^2)
