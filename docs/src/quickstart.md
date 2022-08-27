@@ -8,8 +8,6 @@ using Plots
 using Random
 using SpinGEMPIC
 
-import SpinGEMPIC: set_common_weight
-
 import GEMPIC: OneDGrid, Maxwell1DFEM
 import GEMPIC:  l2projection!, eval_uniform_periodic_spline_curve
 ```
