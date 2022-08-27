@@ -127,7 +127,7 @@ function sample_quietstart!(rng, pg, df, mesh)
         s1 = sin(θ) * sqrt(1-s3^2)
         s2 = cos(θ) * sqrt(1-s3^2)
 
-        w = 1.
+        w = mesh.dimx
 
         # Copy the generated numbers to the particle
         set_x(pg, i_part, x[i])
