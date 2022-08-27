@@ -31,7 +31,7 @@ mesh = OneDGrid( xmin, xmax, nx)
 
 
 ```@example quickstart
-n_particles = 20000
+n_particles = 10000
 
 df = CosGaussian(kx, α, σ, μ)
 
@@ -43,7 +43,7 @@ sample!(rng, particle_group, df, mesh, method = :quietstart)
 ```
 
 ```@example quickstart
-sphereplot(particle_group, 10) # plot 2000 particles
+sphereplot(particle_group)
 ```
 
 ```@example quickstart
