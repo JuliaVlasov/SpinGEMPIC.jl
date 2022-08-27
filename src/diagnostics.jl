@@ -84,7 +84,7 @@ Context to save and plot diagnostics
 
 Outputs
 
-- KineticEnergy: ``\\frac{1}{2} \\sum \\omega_i v_i^2
+- KineticEnergy: ``\\frac{1}{2} \\sum \\omega_i v_i^2``
 - Kineticspi: Zeeman energy
 
 Momentums: compute integrals of f 

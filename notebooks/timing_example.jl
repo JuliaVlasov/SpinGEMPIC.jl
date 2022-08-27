@@ -6,12 +6,6 @@ using Random
 using SpinGEMPIC
 using TimerOutputs
 
-import SpinGEMPIC: set_common_weight
-import SpinGEMPIC: get_s1, get_s2, get_s3
-import SpinGEMPIC: set_s1, set_s2, set_s3
-import SpinGEMPIC: set_weights, get_weights
-import SpinGEMPIC: set_x, set_v
-
 import SpinGEMPIC: operatorHE
 import SpinGEMPIC: operatorHp
 import SpinGEMPIC: operatorHA
@@ -43,8 +37,7 @@ function run_simulation( steps, Δt)
     mass, charge = 1.0, 1.0
     
     particle_group = ParticleGroup( n_particles, mass, charge, 1)   
-    sample!(rng, particle_group, df, mesh)
-    set_common_weight(particle_group, (1.0/n_particles))
+    sample!(rng, particle_group, df, mesh, method = :quietstart)
 
     kernel_smoother2 = ParticleMeshCoupling( mesh, n_particles, spline_degree-2) 
     kernel_smoother1 = ParticleMeshCoupling( mesh, n_particles, spline_degree-1)    
@@ -111,7 +104,7 @@ function run_simulation( steps, Δt)
 
 end
 
-steps, Δt = 1000, 0.05
+steps, Δt = 10000, 0.05
 
 thdiag = run_simulation(steps, Δt)
 
@@ -120,10 +113,9 @@ show(to)
 ref = CSV.read("frame.csv", DataFrame)
 
 time = thdiag.data[!, :Time]
-kenergy = thdiag.data[!, :KineticEnergy]
-plot( time, kenergy, xlabel = "time", ylabel = "kinetic energy", label = "new")
+Sz1 = thdiag.data[!, :Momentum7]
+plot( time, Sz1, xlabel = "time", ylabel = "Sz", label = "new")
 
 time = ref[!, :Time]
-kenergy = ref[!, :KineticEnergy]
-plot!( time, kenergy, xlabel = "time", ylabel = "kinetic energy", label = "old")
-
+Sz2 = ref[!, :Momentum7]
+plot!( time, Sz2, xlabel = "time", ylabel = "Sz", label = "old")

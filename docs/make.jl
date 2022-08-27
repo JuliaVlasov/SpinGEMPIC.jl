@@ -1,6 +1,8 @@
 using Documenter
 using SpinGEMPIC
 
+ENV["GKSwstype"] = "100"
+
 makedocs(
     sitename = "SpinGEMPIC",
     format = Documenter.HTML(;
@@ -16,6 +18,7 @@ makedocs(
                             ),
     modules = [SpinGEMPIC],
     pages = ["Documentation" => ["index.md",
+                                 "quickstart.md",
                                  "example.md",
                                  "particle_mesh_coupling.md",
                                  "distributions.md",

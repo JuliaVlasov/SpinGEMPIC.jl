@@ -1,6 +1,6 @@
 module SpinGEMPIC
 
-using Distributed
+using LinearAlgebra
 
 # Utilities
 include("distributions.jl")
@@ -23,5 +23,6 @@ include("hs.jl")
 
 # Diagnostics
 include("diagnostics.jl")
+include("sphere.jl")
 
 end

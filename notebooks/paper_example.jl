@@ -5,19 +5,7 @@ using ProgressMeter
 using Random
 using SpinGEMPIC
 
-import SpinGEMPIC: set_common_weight
-import SpinGEMPIC: get_s1, get_s2, get_s3
-import SpinGEMPIC: set_s1, set_s2, set_s3
-import SpinGEMPIC: set_weights, get_weights
-import SpinGEMPIC: set_x, set_v
-
-import SpinGEMPIC: operatorHE
-import SpinGEMPIC: operatorHp
-import SpinGEMPIC: operatorHA
-import SpinGEMPIC: operatorHs
-
-import GEMPIC: OneDGrid, Maxwell1DFEM
-import GEMPIC: l2projection!
+import GEMPIC: OneDGrid, Maxwell1DFEM, l2projection!
 
 import HDF5
 import Printf
@@ -29,6 +17,7 @@ function save_spin(istep, pg)
         HDF5.write(file, "s1", pg.array[3,:])  
         HDF5.write(file, "s2", pg.array[4,:]) 
         HDF5.write(file, "s3", pg.array[5,:])
+        HDF5.write(file, "w", pg.array[6,:])
     end
 
 end
@@ -44,7 +33,7 @@ function run_simulation( steps, Δt)
     xmin, xmax = 0, 4pi/kx
     domain = [xmin, xmax, xmax - xmin]
     nx = 128
-    n_particles = 20000
+    n_particles = 100000
     mesh = OneDGrid( xmin, xmax, nx)
     spline_degree = 3
     
@@ -54,7 +43,7 @@ function run_simulation( steps, Δt)
     mass, charge = 1.0, 1.0
     
     particle_group = ParticleGroup( n_particles, mass, charge, 1)   
-    sample!(rng, particle_group, df, mesh)
+    sample!(rng, particle_group, df, mesh, method = :quietstart)
     set_common_weight(particle_group, (1.0/n_particles))
 
     kernel_smoother2 = ParticleMeshCoupling( mesh, n_particles, spline_degree-2) 
@@ -112,7 +101,7 @@ function run_simulation( steps, Δt)
                         efield_poisson, 
                         propagator, particle_group)
 
-        if mod(j, 1000) == 0
+        if mod(j, 100) == 0
             save_spin(j, particle_group)
         end
 
@@ -122,19 +111,13 @@ function run_simulation( steps, Δt)
 
 end
 
-steps, Δt = 80000, 0.05
+steps, Δt = 99000, 0.05
 
 thdiag = run_simulation(steps, Δt)
 
 CSV.write("data_paper.csv",thdiag.data)
 
-ref = CSV.read("frame.csv", DataFrame)
-
 time = thdiag.data[!, :Time]
-kenergy = thdiag.data[!, :KineticEnergy]
-plot( time, kenergy, xlabel = "time", ylabel = "kinetic energy", label = "new")
-
-time = ref[!, :Time]
-kenergy = ref[!, :KineticEnergy]
-plot!( time, kenergy, xlabel = "time", ylabel = "kinetic energy", label = "old")
-
+kenergy = thdiag.data[!, :Momentum7]
+plot( time, kenergy, xlabel = "time", ylabel = "Sz", label = "Δt = $Δt")
+png("Sz")
