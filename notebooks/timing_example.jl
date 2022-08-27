@@ -104,7 +104,7 @@ function run_simulation( steps, Δt)
 
 end
 
-steps, Δt = 10000, 0.05
+steps, Δt = 2000, 0.05
 
 thdiag = run_simulation(steps, Δt)
 
@@ -113,9 +113,10 @@ show(to)
 ref = CSV.read("frame.csv", DataFrame)
 
 time = thdiag.data[!, :Time]
-Sz1 = thdiag.data[!, :Momentum7]
-plot( time, Sz1, xlabel = "time", ylabel = "Sz", label = "new")
+nrj2 = thdiag.data[!, :PotentialEnergyE1]
+plot( time, 0.5*log.(nrj1.^2), xlabel = "time", ylabel = "Ex energy", label = "quietstart")
 
 time = ref[!, :Time]
-Sz2 = ref[!, :Momentum7]
-plot!( time, Sz2, xlabel = "time", ylabel = "Sz", label = "old")
+nrj2 = ref[!, :PotentialEnergyE1]
+plot!( time, 0.5*log.(nrj2.^2), xlabel = "time", ylabel = "Ex energy", label = "weighted")
+xlims!(0,100)
