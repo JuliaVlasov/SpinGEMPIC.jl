@@ -90,15 +90,22 @@ Outputs
 Momentums: compute integrals of f 
 
 - Momentum1 : ``\\sum x_i  \\omega_i``
-- Momentum2 : ``\\sum x_i * \\omega_i * s1``
-- Momentum3 : ``\\sum x_i * \\omega_i * s2``
-- Momentum4 : ``\\sum x_i * \\omega_i * s3``
-- Momentum5 : ``\\sum \\omega_i * s1``
-- Momentum6 : ``\\sum \\omega_i * s2``
-- Momentum7 : ``\\sum \\omega_i * s3``
+- Momentum2 : ``\\sum x_i  \\omega_i  s1``
+- Momentum3 : ``\\sum x_i  \\omega_i  s2``
+- Momentum4 : ``\\sum x_i  \\omega_i  s3``
+- Momentum5 : ``\\sum \\omega_i  s1``
+- Momentum6 : ``\\sum \\omega_i  s2``
+- Momentum7 : ``\\sum \\omega_i  s3``
 - Momentum8 : `` A_y \\sum div(\\rho)  \\omega_i s2 + A_z div(\\rho) \\omega_i s3``
-- Momentum9 :  ``- A_y div(\\rho)  \\omega_i  s1`` 
+- Momentum9 :  ``- A_y div(\\rho) \\omega_i s1`` 
 - Momentum10 : ``- A_z div(\\rho) \\omega_i s1``
+- PotentialEnergyE1 : ``\\frac{1}{2} E_x^2``
+- PotentialEnergyE2 : ``\\frac{1}{2} E_y^2``
+- PotentialEnergyE3 : ``\\frac{1}{2} E_z^2``
+- PotentialEnergyB2 : ``\\frac{1}{2} B_y^2``
+- PotentialEnergyB3 : ``\\frac{1}{2} B_z^2``
+- Transfer : ``\\sum (v_i \\cdot e_{x,i}) w_i ``
+- ErrorPoisson : difference between ``E_x`` computed with Maxwell Solver et ``E_x`` computed from charge
 """
 mutable struct TimeHistoryDiagnostics
 
@@ -134,7 +141,7 @@ mutable struct TimeHistoryDiagnostics
             PotentialEnergyB2 = Float64[],
             PotentialEnergyB3 = Float64[],
             Transfer = Float64[],
-            ErrorPoisson = Float64[],
+            ErrorPoisson = Float64[]
         )
 
 
