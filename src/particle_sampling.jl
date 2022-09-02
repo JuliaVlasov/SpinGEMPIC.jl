@@ -84,6 +84,27 @@ Sample from a Particle sampler
 - `pg`   : Particle group
 - `df`   : Distribution function
 - `mesh` : Domain
+
+Input r is a random number ``\\in [0,1]``
+
+```math
+    f(x) = 1 + \\alpha cos(k x)
+```
+on some domain ``[0, 2\\pi/k]``
+
+Solve the equation ``P(x)-r=0`` with Newton’s method
+
+```math
+    x^{n+1} = x^n – (P(x)-(2\\pi r / k)/f(x) 
+```
+
+with 
+```math
+P(x) = \\int_0^x (1 + \\alpha cos(k y)) dy
+```
+```math
+P(x) = x + \\frac{\\alpha}{k} sin (k x)
+```
 """
 function sample_quietstart!(rng, pg, df, mesh)
 
@@ -99,29 +120,41 @@ function sample_quietstart!(rng, pg, df, mesh)
 
     # Cumulative distribution function 
     xmin, xmax = mesh.xmin, mesh.xmax
-    x = LinRange(xmin, xmax, n) |> collect
-    f = 1 .+ α * cos.(kx .* x)
-    dx = (xmax - xmin) / (n-1)
-    cdf_f = cumsum(f) * dx 
 
-    y = LinRange(-1, 1, n) |> collect
-    g = 1 .+ y ./ 2
-    dy = 2.0 / (n-1)
-    cdf_g = cumsum(g) * dy 
+    function newton_x(r)
+        x0, x1 = xmin, xmax
+        r *= (xmax - xmin)
+        while (abs(x1-x0) > 1e-12)
+            p = x0 + α * sin( kx * x0) / kx
+            f = 1 + α * cos( kx * x0)
+            x0, x1 = x1, x0 - (p - r) / f
+        end
+        x1
+    end
+
+    function newton_s3(r)
+        x0, x1 = -1, 1
+        s = -3/4 + 2r 
+        while (abs(x1-x0) > 1e-12)
+            p = x0 * ( 1 + x0 / 4)
+            f = 1 + x0 / 2
+            x0, x1 = x1, x0 - (p - s) / f
+        end
+        x1
+    end
 
     for i_part = 1:n
 
         # x, v
         r1, r2 = Sobol.next!(r_sobol)
-        v = σ * sqrt(-2 * log( (i_part-0.5)/n)) * sin(2π * r2)
 
-        i = findmin(abs.(cdf_f .- r1 * mesh.dimx) )[2]
+        x = newton_x(r1)
+        v = σ * sqrt(-2 * log( (i_part-0.5)/n)) * sin(2π * r2)
 
         # s1, s2, s3
         z1, z2 = Sobol.next!(s_sobol)
-        j = findmin(abs.(cdf_g .- 2z1))[2]
 
-        s3 = y[j]
+        s3 = newton_s3(z1)
         θ = 4π * z2 
 
         s1 = sin(θ) * sqrt(1-s3^2)
@@ -130,7 +163,7 @@ function sample_quietstart!(rng, pg, df, mesh)
         w = mesh.dimx
 
         # Copy the generated numbers to the particle
-        set_x(pg, i_part, x[i])
+        set_x(pg, i_part, x)
         set_v(pg, i_part, v)
         set_s1(pg, i_part, s1)
         set_s2(pg, i_part, s2)
