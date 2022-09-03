@@ -108,7 +108,7 @@ P(x) = x + \\frac{\\alpha}{k} sin (k x)
 """
 function sample_quietstart!(rng, pg, df, mesh)
 
-    set_common_weight(pg, (1.0 / pg.n_particles))
+    set_common_weight(pg, 1.0)
 
     r_sobol = SobolSeq(2)
     s_sobol = SobolSeq(2)
@@ -160,7 +160,7 @@ function sample_quietstart!(rng, pg, df, mesh)
         s1 = sin(θ) * sqrt(1-s3^2)
         s2 = cos(θ) * sqrt(1-s3^2)
 
-        w = mesh.dimx
+        w = mesh.dimx / n
 
         # Copy the generated numbers to the particle
         set_x(pg, i_part, x)
